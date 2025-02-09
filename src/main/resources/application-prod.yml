@@ -1,0 +1,28 @@
+
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate:
+        format_sql: true
+
+# OpenAPI - Swagger
+openapi:
+  service:
+    api-docs: API-Service document prod
+    description: API service of Booking Cinema prod
+    server: http://localhost:${server.port}
+    title: ${API_TITLE:DUMMY-API-TITLE}
+    version: 1.0.0
+#springdoc:
+#  api-docs:
+#    enabled: false
+#  swagger-ui:
+#    enabled: false

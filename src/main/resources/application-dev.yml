@@ -1,0 +1,36 @@
+server:
+  port: 8080
+
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:mysql://localhost:3306/booking_cinema
+    username: root
+    password: Vl121620.
+    driver-class-name: com.mysql.cj.jdbc.Driver
+
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    database-platform: org.hibernate.dialect.MySQLDialect
+    properties:
+      hibernate:
+        format_sql: true
+
+# OpenAPI - Swagger
+openapi:
+  service:
+    api-docs: API-Service document dev
+    description: API service of Booking Cinema dev
+    server: http://localhost:${server.port}
+    title: ${API_TITLE:DUMMY-API-TITLE}
+    version: 1.0.0
+#springdoc:
+#  api-docs:
+#    enabled: true
+#  swagger-ui:
+#    enabled: true

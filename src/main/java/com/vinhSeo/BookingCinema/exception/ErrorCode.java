@@ -4,7 +4,9 @@ import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
+    ERROR_LOGIN(1000, "Error login"),
     ERROR_MOVIE(1001, "Error movie"),
+    ERROR_USER(1002, "Error user"),
 
     ;
 

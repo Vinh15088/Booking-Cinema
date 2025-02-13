@@ -2,20 +2,19 @@ package com.vinhSeo.BookingCinema.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.vinhSeo.BookingCinema.utils.PageInfo;
-import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Getter;
+import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Getter
+@Setter
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @AllArgsConstructor // For GET, POST
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class DataApiResponse<T> {
+public class DataApiResponse<T> implements Serializable {
     boolean success;
     int code;
     String message;

@@ -35,15 +35,13 @@ public class GlobalExceptionHandler {
     ResponseEntity<DataApiResponse<?>> handlingMethodArgumentNotValidException(
             MethodArgumentNotValidException exception){
 
-        String enumKey = Objects.requireNonNull(exception.getFieldError()).getDefaultMessage();
-
-        ErrorApp errorApp = ErrorApp.valueOf(enumKey);
+        String errorMessage = Objects.requireNonNull(exception.getFieldError()).getDefaultMessage();
 
         DataApiResponse<?> apiResponse =DataApiResponse.builder()
                 .success(false)
                 .timestamp(new Date())
-                .code(errorApp.getErrorCode().getCode())
-                .message(errorApp.getMessage())
+                .code(BAD_REQUEST.value())
+                .message(errorMessage)
                 .build();
 
         return ResponseEntity.badRequest().body(apiResponse);

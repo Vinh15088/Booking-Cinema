@@ -27,7 +27,7 @@ import java.util.List;
 @RequestMapping("/movie")
 @Validated
 @Tag(name = "Movie Controller")
-@Slf4j
+@Slf4j(topic = "MOVIE_CONTROLLER")
 @RequiredArgsConstructor
 public class MovieController {
 
@@ -50,7 +50,7 @@ public class MovieController {
 
         DataApiResponse dataApiResponse = DataApiResponse.builder()
                 .success(true)
-                .code(HttpStatus.OK.value())
+                .code(HttpStatus.CREATED.value())
                 .timestamp(new Date())
                 .message("Movie created successfully")
                 .data(movieResponse)
@@ -62,7 +62,7 @@ public class MovieController {
             description = "Send a request via this API to get movie by Id")
     @GetMapping("/{id}")
     public ResponseEntity<?> getMovieById(@PathVariable @Min(value = 1, message = "id must be greater than 0")  int id) {
-        log.info("Get movie by Id");;
+        log.info("Get movie by Id: {}", id);;
         Movie movie = movieService.getMovieById(id);
 
         MovieResponse movieResponse = movieMapper.toMovieResponse(movie);
@@ -82,7 +82,7 @@ public class MovieController {
             description = "Send a request via this API to get movie by Title")
     @GetMapping()
     public ResponseEntity<?> getMovieByTitle(@RequestParam String title) {
-        log.info("Get movie by Title");;
+        log.info("Get movie by Title: {}", title);;
         Movie movie = movieService.getMovieByTitle(title);
 
         MovieResponse movieResponse = movieMapper.toMovieResponse(movie);
@@ -98,104 +98,52 @@ public class MovieController {
         return ResponseEntity.ok().body(dataApiResponse);
     }
 
-    @Operation(method = "GET", summary = "Get all movies",
-            description = "Send a request via this API to get all movies")
-    @GetMapping("/all")
-    public ResponseEntity<?> getAllMovies() {
-        log.info("Get all movies");;
-        List<Movie> movies = movieService.getAllMovies();
-
-        List<MovieResponse> movieResponses = movies.stream().map(movieMapper::toMovieResponse).toList();
-
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
-                .success(true)
-                .code(HttpStatus.OK.value())
-                .timestamp(new Date())
-                .message("Get all movies successfully")
-                .data(movieResponses)
-                .build();
-
-        return ResponseEntity.ok().body(dataApiResponse);
-    }
-
-    @Operation(method = "GET", summary = "Get movies by page number",
-            description = "Send a request via this API to get movies by page number")
-    @GetMapping("/page")
-    public ResponseEntity<?> getMoviesPage(
+    @Operation(method = "GET", summary = "Get movies with optional pagination and search",
+            description = "Send a request via this API to get movies. You can optionally paginate and search.")
+    @GetMapping("/list")
+    public ResponseEntity<?> getMovies(
+            @RequestParam(name = "keyword") String keyword,
             @RequestParam(name = "size", defaultValue = PAGE_SIZE) Integer size,
             @RequestParam(name = "number", defaultValue = PAGE_NUMBER) Integer number,
             @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
             @RequestParam(name = "order", defaultValue = "asc") String order
     ) {
-        log.info("Get movies by page number");;
-        Page<Movie> moviePage = movieService.getPageMovies(number-1, size, sortBy, order);
+        log.info("Get users with optional pagination and search");
 
-        List<Movie> moviesList = moviePage.getContent();
+        Page<Movie> moviePage = movieService.searchMovie(keyword, number-1, size, sortBy, order);
 
-        List<MovieResponse> movieResponses = moviesList.stream().map(movieMapper::toMovieResponse).toList();
+        List<Movie> movieList = moviePage.getContent();
 
-        PageInfo pageInfo = PageInfo.builder()
-                .pageSize(moviePage.getSize())
-                .pageNumber(moviePage.getNumber()+1)
-                .totalPages(moviePage.getTotalPages())
-                .totalElements(moviePage.getNumberOfElements())
-                .build();
+        List<MovieResponse> userResponses = movieList.stream().map(movieMapper::toMovieResponse).toList();
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
-                .success(true)
-                .code(HttpStatus.OK.value())
-                .timestamp(new Date())
-                .message("Get movies by page number successfully")
-                .data(movieResponses)
-                .pageInfo(pageInfo)
-                .build();
-
-        return ResponseEntity.ok().body(dataApiResponse);
-    }
-
-    @Operation(method = "GET", summary = "Search movies with keyword of title",
-            description = "Send a request via this API to search movies with keyword of title")
-    @GetMapping("/search")
-    public ResponseEntity<?> searchMoviesWithTitle(
-            @RequestParam(name = "title") String title,
-            @RequestParam(name = "size", defaultValue = PAGE_SIZE) Integer size,
-            @RequestParam(name = "number", defaultValue = PAGE_NUMBER) Integer number,
-            @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
-            @RequestParam(name = "order", defaultValue = "asc") String order
-    ) {
-        log.info("Search movies with keyword of title");;
-        Page<Movie> moviePage = movieService.searchMoviesWithTitle(title,number-1, size, sortBy, order);
-
-        List<Movie> moviesList = moviePage.getContent();
-
-        List<MovieResponse> movieResponses = moviesList.stream().map(movieMapper::toMovieResponse).toList();
-
-        PageInfo pageInfo = PageInfo.builder()
-                .pageSize(moviePage.getSize())
-                .pageNumber(moviePage.getNumber()+1)
-                .totalPages(moviePage.getTotalPages())
-                .totalElements(moviePage.getNumberOfElements())
-                .build();
+        PageInfo pageInfo = null;
+        if (moviePage != null) {
+            pageInfo = PageInfo.builder()
+                    .pageSize(moviePage.getSize())
+                    .pageNumber(moviePage.getNumber() + 1)
+                    .totalPages(moviePage.getTotalPages())
+                    .totalElements(moviePage.getNumberOfElements())
+                    .build();
+        }
 
         DataApiResponse dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .timestamp(new Date())
-                .message("Search movies with keyword of title successfully")
-                .data(movieResponses)
+                .message("Search movies successfully")
+                .data(userResponses)
                 .pageInfo(pageInfo)
                 .build();
 
         return ResponseEntity.ok().body(dataApiResponse);
     }
-
 
     @Operation(method = "PUT", summary = "Update movie by Id",
             description = "Send a request via this API to update movie by Id")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateMovie(@PathVariable @Min(value = 1, message = "id must be greater than 0")  int id,
                                          @Valid @RequestBody MovieRequest movieRequest) {
-        log.info("Update movie by Id");;
+        log.info("Update movie by Id: {}", id);;
 
         Movie movie = movieService.updateMovie(id, movieRequest);
 
@@ -203,7 +151,7 @@ public class MovieController {
 
         DataApiResponse dataApiResponse = DataApiResponse.builder()
                 .success(true)
-                .code(HttpStatus.OK.value())
+                .code(HttpStatus.ACCEPTED.value())
                 .timestamp(new Date())
                 .message("Update movie successfully")
                 .data(movieResponse)
@@ -216,13 +164,13 @@ public class MovieController {
             description = "Send a request via this API to delete movie by Id")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteMovie(@PathVariable @Min(value = 1, message = "id must be greater than 0")  int id) {
-        log.info("Delete movie by Id");;
+        log.info("Delete movie by Id: {}", id);;
 
         movieService.deleteMovie(id);
 
         DataApiResponse dataApiResponse = DataApiResponse.builder()
                 .success(true)
-                .code(HttpStatus.OK.value())
+                .code(HttpStatus.RESET_CONTENT.value())
                 .timestamp(new Date())
                 .message("Delete movie successfully")
                 .build();

@@ -34,11 +34,11 @@ public class Movie {
     String language;
 
     @Column(name = "age_limit")
-    int age_limit;
+    int ageLimit;
 
     @Column(name = "release_date", nullable = false)
     @Temporal(TemporalType.DATE)
-    Date release_date;
+    Date releaseDate;
 
     @Column(name = "rating")
     Float rating;

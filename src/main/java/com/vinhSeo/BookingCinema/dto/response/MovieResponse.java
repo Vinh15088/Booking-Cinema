@@ -3,6 +3,7 @@ package com.vinhSeo.BookingCinema.dto.response;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.io.Serializable;
 import java.util.Date;
 
 @Getter
@@ -10,14 +11,14 @@ import java.util.Date;
 @Builder
 @AllArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
-public class MovieResponse {
+public class MovieResponse implements Serializable {
     String id;
     String title;
     String description;
     int duration;
     String language;
-    int age_limit;
-    Date release_date;
+    int ageLimit;
+    Date releaseDate;
     Float rating;
     String status;
 }

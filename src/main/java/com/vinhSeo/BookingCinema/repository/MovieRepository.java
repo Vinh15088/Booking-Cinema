@@ -14,7 +14,6 @@ public interface MovieRepository extends JpaRepository<Movie, Integer> {
     Boolean existsByTitle(String title);
     Optional<Movie> findByTitle(String title);
 
-    @Query("SELECT m FROM Movie m " +
-            "WHERE m.title LIKE %?1%")
-    Page<Movie> findByTitleContaining(String title, Pageable pageable);
+    @Query("SELECT m FROM Movie m WHERE m.title LIKE %?1%")
+    Page<Movie> findAll(String keyword, Pageable pageable);
 }

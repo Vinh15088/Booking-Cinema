@@ -13,7 +13,7 @@ import java.text.SimpleDateFormat;
 
 @Mapper(componentModel = "spring")
 public interface MovieMapper {
-    @Mapping(target = "release_date", expression = "java(buildStringToDate(request))")
+    @Mapping(target = "releaseDate", expression = "java(buildStringToDate(request))")
     @Mapping(target = "status", expression = "java(buildStatus(request))")
     Movie toMovie(MovieRequest request);
 
@@ -22,7 +22,7 @@ public interface MovieMapper {
     default Date buildStringToDate(MovieRequest request) {
         try {
             SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
-            Date releaseDate = dateFormat.parse(request.getRelease_date());
+            Date releaseDate = dateFormat.parse(request.getReleaseDate());
 
             return releaseDate;
         } catch (ParseException e) {

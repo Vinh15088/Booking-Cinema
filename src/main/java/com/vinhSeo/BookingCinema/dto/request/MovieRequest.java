@@ -30,10 +30,10 @@ public class MovieRequest implements Serializable {
 
     @NotNull(message = "age_limit must be not null")
     @Min(value = 1, message = "age_limit must greater than 1")
-    int age_limit;
+    int ageLimit;
 
-    @NotBlank(message = "release_date must be not blank")
-    String release_date; // type yyyy-MM-dd
+    @NotBlank(message = "releaseDate must be not blank")
+    String releaseDate; // type yyyy-MM-dd
 
     @EnumValue(name = "movie_status", enumClass = MovieStatus.class)
     String status;

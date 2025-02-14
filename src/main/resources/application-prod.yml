@@ -1,3 +1,5 @@
+server:
+  port: 8082
 
 spring:
   config:
@@ -26,3 +28,6 @@ openapi:
 #    enabled: false
 #  swagger-ui:
 #    enabled: false
+
+jwt:
+  secretKey: prod@12345

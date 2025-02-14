@@ -10,6 +10,7 @@ spring:
     url: jdbc:mysql://localhost:3306/booking_cinema
     username: root
     password: Vl121620.
+    driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
     show-sql: true
@@ -33,3 +34,6 @@ openapi:
 #    enabled: true
 #  swagger-ui:
 #    enabled: true
+
+jwt:
+  secretKey: test@12345

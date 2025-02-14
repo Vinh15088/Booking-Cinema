@@ -2,7 +2,6 @@ package com.vinhSeo.BookingCinema.dto.request;
 
 import com.vinhSeo.BookingCinema.dto.validator.EnumValue;
 import com.vinhSeo.BookingCinema.enums.Gender;
-import com.vinhSeo.BookingCinema.enums.UserStatus;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import lombok.AccessLevel;
@@ -30,9 +29,6 @@ public class UserCreateRequest implements Serializable {
     @NotBlank(message = "email must be not blank")
     @Email(message = "email invalid")
     String email;
-
-    @EnumValue(name = "userStatus", enumClass = UserStatus.class)
-    String userStatus;
 
     @NotBlank(message = "username must be not blank")
     String username;

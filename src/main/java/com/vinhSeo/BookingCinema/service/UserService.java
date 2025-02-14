@@ -1,8 +1,12 @@
 package com.vinhSeo.BookingCinema.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.vinhSeo.BookingCinema.dto.request.UserCreateRequest;
 import com.vinhSeo.BookingCinema.dto.request.UserPasswordRequest;
 import com.vinhSeo.BookingCinema.dto.request.UserUpdateRequest;
+import com.vinhSeo.BookingCinema.enums.UserStatus;
 import com.vinhSeo.BookingCinema.exception.AppException;
 import com.vinhSeo.BookingCinema.exception.ErrorApp;
 import com.vinhSeo.BookingCinema.mapper.UserMapper;
@@ -11,15 +15,18 @@ import com.vinhSeo.BookingCinema.model.User;
 import com.vinhSeo.BookingCinema.model.UserHasRole;
 import com.vinhSeo.BookingCinema.repository.RoleRepository;
 import com.vinhSeo.BookingCinema.repository.UserRepository;
+import jakarta.mail.MessagingException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @Slf4j(topic = "USER_SERVICE")
@@ -29,8 +36,11 @@ public class UserService {
     private final RoleRepository roleRepository;
     private final UserMapper userMapper;
     private final PasswordEncoder passwordEncoder;
+    private final MailService mailService;
+    private final KafkaTemplate<String, JsonNode> kafkaTemplate;
 
-    public User createUser(UserCreateRequest userCreateRequest) {
+    @Transactional
+    public User createUser(UserCreateRequest userCreateRequest) throws MessagingException {
         log.info("Creating user: {}", userCreateRequest.getUsername());
 
         if(userRepository.findByUsername(userCreateRequest.getUsername()) != null) {
@@ -51,18 +61,33 @@ public class UserService {
                 .build();
 
         user.getRoles().add(userHasRole);
-
+        user.setUserStatus(UserStatus.NONE);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
 
-        return userRepository.save(user);
+        User result = userRepository.save(user);
+
+        if(result != null) {
+//            mailService.verifyMail(user.getEmail(), user.getUsername());
+            ObjectMapper objectMapper = new ObjectMapper();
+            ObjectNode verifyEmailMessage = objectMapper.createObjectNode();
+
+            verifyEmailMessage.put("email", user.getEmail());
+            verifyEmailMessage.put("username", user.getUsername());
+
+            kafkaTemplate.send("VERIFY_EMAIL_TOPIC", verifyEmailMessage);
+        }
+
+        return result;
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public User getUserById(Integer id) {
         log.info("Getting user by id: {}", id);
 
         return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorApp.USER_NOT_FOUND));
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public Page<User> searchUser(String keyword, Integer number, Integer size, String sortBy, String order) {
         log.info("Searching user with keyword {}", keyword);
 
@@ -78,6 +103,7 @@ public class UserService {
         return result;
     }
 
+    @PreAuthorize("hasAnyAuthority('USER')")
     public User updateUser(Integer id, UserUpdateRequest userUpdateRequest) {
         log.info("Updating user with id {}", id);
 
@@ -92,6 +118,7 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
+    @PreAuthorize("hasAnyAuthority('USER')")
     public User changePassword(UserPasswordRequest userPasswordRequest) {
         log.info("Changing password for user: {}", userPasswordRequest.getId());
 
@@ -114,8 +141,13 @@ public class UserService {
         return userRepository.save(user);
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public void deleteUser(Integer id) {
         log.info("Deleting user with id: {}", id);
+
+        if(!userRepository.existsById(id)) {
+            throw new AppException(ErrorApp.USER_NOT_FOUND);
+        }
 
         userRepository.deleteById(id);
     }

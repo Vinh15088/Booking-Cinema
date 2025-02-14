@@ -16,7 +16,7 @@ public interface UserMapper {
 
     @Mapping(target = "dateOfBirth", expression = "java(parseDate(request.getDateOfBirth()))")
     @Mapping(target = "gender", expression = "java(parseEnum(request.getGender(), Gender.class))")
-    @Mapping(target = "userStatus", expression = "java(parseEnum(request.getUserStatus(), UserStatus.class))")
+//    @Mapping(target = "userStatus", expression = "java(parseEnum(request.getUserStatus(), UserStatus.class))")
     User toUserCreate(UserCreateRequest request);
 
     @Mapping(target = "dateOfBirth", expression = "java(parseDate(request.getDateOfBirth()))")

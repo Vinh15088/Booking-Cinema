@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 
@@ -24,6 +25,7 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final MovieMapper movieMapper;
 
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public Movie createMovie(MovieRequest request) {
         log.info("Create new movie");
 
@@ -38,6 +40,7 @@ public class MovieService {
         return movieRepository.save(movie);
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public Movie getMovieById(int id) {
         log.info("Get movie by id: {}", id);
 
@@ -47,6 +50,7 @@ public class MovieService {
         return movie;
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public Movie getMovieByTitle(String title) {
         log.info("Get movie by title: {}", title);
 
@@ -71,6 +75,7 @@ public class MovieService {
         return result;
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public Movie updateMovie(int id, MovieRequest request) {
         log.info("Update movie with id: {}", id);
 
@@ -82,6 +87,7 @@ public class MovieService {
         return movieRepository.save(newMovie);
     }
 
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public void deleteMovie(int id) {
         log.info("Delete movie with id: {}", id);
 

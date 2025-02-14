@@ -11,6 +11,7 @@ import com.vinhSeo.BookingCinema.service.UserService;
 import com.vinhSeo.BookingCinema.utils.PageInfo;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.mail.MessagingException;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import lombok.RequiredArgsConstructor;
@@ -40,8 +41,8 @@ public class UserController {
 
     @Operation(method = "POST", summary = "Create new user",
             description = "Send a request via this API to create new user")
-    @PostMapping()
-    public ResponseEntity<?> createUser(@Valid @RequestBody UserCreateRequest userCreateRequest) {
+    @PostMapping("/register")
+    public ResponseEntity<?> createUser(@Valid @RequestBody UserCreateRequest userCreateRequest) throws MessagingException {
         log.info("Create new movie");
 
         User user = userService.createUser(userCreateRequest);

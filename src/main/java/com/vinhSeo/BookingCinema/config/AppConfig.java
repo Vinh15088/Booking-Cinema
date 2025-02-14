@@ -5,13 +5,13 @@ import com.vinhSeo.BookingCinema.service.UserServiceDetail;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -24,14 +24,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 @RequiredArgsConstructor
-@EnableWebSecurity
 @EnableGlobalMethodSecurity(prePostEnabled = true)
 public class AppConfig {
 
     private final String[] publicEnpoints = {
             "/auth/**",
-            "/movie/**",
-            "/user/**"
+
     };
 
     private final UserServiceDetail userServiceDetail;
@@ -40,9 +38,14 @@ public class AppConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(AbstractHttpConfigurer::disable)
-                .authorizeHttpRequests(request ->
-                        request.requestMatchers(publicEnpoints).permitAll()
-                                .anyRequest().authenticated())
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers(publicEnpoints).permitAll()
+                        .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/movie/list").permitAll()
+                        .anyRequest().authenticated()
+                )
+
+
                 .sessionManagement(manager -> manager.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authenticationProvider(authenticationProvider())
                 .addFilterBefore(customizeRequestFilter, UsernamePasswordAuthenticationFilter.class);
@@ -52,9 +55,9 @@ public class AppConfig {
 
     @Bean
     public WebSecurityCustomizer webSecurityCustomizer() {
-        return webSecurity -> webSecurity
+        return (webSecurity) -> webSecurity
                 .ignoring()
-                .requestMatchers("/swagger-ui*/*swagger-initializer.js", "/swagger-ui*/**");
+                .requestMatchers("/actuator/**", "/v3/**", "/webjars/**", "/swagger-ui*/*swagger-initializer.js", "/swagger-ui*/**");
     }
 
     @Bean

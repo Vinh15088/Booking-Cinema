@@ -19,6 +19,18 @@ public enum ErrorApp {
     USER_PASSWORD_CONFIRM("Password is not equal to confirm password",HttpStatus.BAD_REQUEST, ErrorCode.ERROR_USER),
     USER_OLD_PASSWORD("Old password is not correct",HttpStatus.BAD_REQUEST, ErrorCode.ERROR_USER),
 
+    CINEMA_NOT_FOUND("Cinema is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_CINEMA),
+
+    SEAT_TYPE_NOT_FOUND("Seat type is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SEAT_TYPE),
+
+    SEAT_EXISTED_IN_CINEMA_HALL("Seat existed in this cinema hall", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SEAT),
+    SEAT_NOT_FOUND("Seat is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SEAT),
+
+    CINEMA_HALL_NOT_FOUND("Cinema hall is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_CINEMA_HALL),
+    CINEMA_HALL_EXISTED_IN_CINEMA("Cinema hall is existed in cinema", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_CINEMA_HALL),
+
+    ROOM_TYPE_NOT_FOUND("Room type is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_ROOM_TYPE),
+
 
 
 

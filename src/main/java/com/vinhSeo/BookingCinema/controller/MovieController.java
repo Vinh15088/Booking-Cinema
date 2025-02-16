@@ -48,7 +48,7 @@ public class MovieController {
 
         MovieResponse movieResponse = movieMapper.toMovieResponse(movie);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.CREATED.value())
                 .timestamp(new Date())
@@ -67,7 +67,7 @@ public class MovieController {
 
         MovieResponse movieResponse = movieMapper.toMovieResponse(movie);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .timestamp(new Date())
@@ -87,7 +87,7 @@ public class MovieController {
 
         MovieResponse movieResponse = movieMapper.toMovieResponse(movie);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .timestamp(new Date())
@@ -126,7 +126,7 @@ public class MovieController {
                     .build();
         }
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .timestamp(new Date())
@@ -149,7 +149,7 @@ public class MovieController {
 
         MovieResponse movieResponse = movieMapper.toMovieResponse(movie);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.ACCEPTED.value())
                 .timestamp(new Date())
@@ -168,7 +168,7 @@ public class MovieController {
 
         movieService.deleteMovie(id);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.RESET_CONTENT.value())
                 .timestamp(new Date())

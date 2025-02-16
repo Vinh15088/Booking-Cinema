@@ -36,7 +36,7 @@ public class AuthenticationController {
 
         TokenResponse tokenResponse = authenticationService.getAccessToken(userLoginRequest);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.CREATED.value())
                 .timestamp(new Date())
@@ -55,7 +55,7 @@ public class AuthenticationController {
 
         TokenResponse tokenResponse = authenticationService.getRefreshToken(request);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.CREATED.value())
                 .timestamp(new Date())
@@ -74,7 +74,7 @@ public class AuthenticationController {
 
         String result = authenticationService.removeToken(request);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.CREATED.value())
                 .timestamp(new Date())
@@ -91,7 +91,7 @@ public class AuthenticationController {
 
         List<RedisToken> redisTokens = redisTokenService.findAll();
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .timestamp(new Date())
@@ -111,7 +111,7 @@ public class AuthenticationController {
 
         authenticationService.confirmMail(id, email);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .timestamp(new Date())

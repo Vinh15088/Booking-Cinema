@@ -49,7 +49,7 @@ public class UserController {
 
         UserResponse userResponse = userMapper.toUserResponse(user);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.CREATED.value())
                 .timestamp(new Date())
@@ -70,7 +70,7 @@ public class UserController {
 
         UserResponse userResponse = userMapper.toUserResponse(user);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .timestamp(new Date())
@@ -109,7 +109,7 @@ public class UserController {
                     .build();
         }
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .timestamp(new Date())
@@ -132,7 +132,7 @@ public class UserController {
 
         UserResponse userResponse = userMapper.toUserResponse(user);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.ACCEPTED.value())
                 .timestamp(new Date())
@@ -152,7 +152,7 @@ public class UserController {
 
         UserResponse userResponse = userMapper.toUserResponse(user);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.NO_CONTENT.value())
                 .timestamp(new Date())
@@ -171,7 +171,7 @@ public class UserController {
 
         userService.deleteUser(id);
 
-        DataApiResponse dataApiResponse = DataApiResponse.builder()
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.RESET_CONTENT.value())
                 .timestamp(new Date())

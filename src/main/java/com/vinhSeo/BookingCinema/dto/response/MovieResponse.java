@@ -21,4 +21,6 @@ public class MovieResponse implements Serializable {
     Date releaseDate;
     Float rating;
     String status;
+    String trailer;
+    String banner;
 }

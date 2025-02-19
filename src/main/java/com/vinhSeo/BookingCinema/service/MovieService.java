@@ -15,6 +15,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.util.Map;
 
 
 @Service
@@ -24,20 +28,34 @@ public class MovieService {
 
     private final MovieRepository movieRepository;
     private final MovieMapper movieMapper;
+    private final CloudinaryService cloudinaryService;
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public Movie createMovie(MovieRequest request) {
+    public Movie createMovie(MovieRequest request, MultipartFile trailer, MultipartFile banner) throws IOException {
         log.info("Create new movie");
 
         if(movieRepository.existsByTitle(request.getTitle())) throw  new AppException(ErrorApp.MOVIE_EXISTED);
 
         Movie movie = movieMapper.toMovie(request);
+        movie.setTrailer(trailer.getOriginalFilename());
+        movie.setBanner(banner.getOriginalFilename());
 
         if(request.getStatus() == null || request.getStatus().isEmpty()) {
             movie.setStatus(MovieStatus.SHOWING);
         }
 
-        return movieRepository.save(movie);
+        movieRepository.save(movie);
+
+        String folderTrailer = "BookingCinema/Trailer/" + movie.getId();
+        String folderBanner = "BookingCinema/Banner/" + movie.getId();
+
+        log.info("folderTrailer: {}", folderTrailer);
+        log.info("folderBanner: {}", folderBanner);
+
+        cloudinaryService.uploadFile(banner, folderBanner);
+        cloudinaryService.uploadVideo(trailer, folderTrailer);
+
+        return movie;
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
@@ -76,7 +94,7 @@ public class MovieService {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public Movie updateMovie(int id, MovieRequest request) {
+    public Movie updateMovie(int id, MovieRequest request, MultipartFile trailer, MultipartFile banner) throws IOException {
         log.info("Update movie with id: {}", id);
 
         Movie movie = getMovieById(id);
@@ -84,15 +102,35 @@ public class MovieService {
         Movie newMovie = movieMapper.toMovie(request);
         newMovie.setId(id);
 
+        String folderTrailer = "BookingCinema/Trailer/" + movie.getId();
+        String folderBanner = "BookingCinema/Banner/" + movie.getId();
+
+        String publicIdTrailer = folderTrailer + "/" + movie.getTrailer().substring(0, movie.getTrailer().lastIndexOf("."));
+        String publicIdBanner = folderBanner + "/" + movie.getBanner().substring(0, movie.getBanner().lastIndexOf("."));
+
+        Map<String, String> updateFile = cloudinaryService.updateFile(banner, folderBanner, publicIdBanner);
+        Map<String, String> updateTrailer = cloudinaryService.updateVideo(trailer, folderTrailer, publicIdTrailer);
+
+        if(updateFile != null) newMovie.setBanner(banner.getOriginalFilename());
+        if(updateTrailer != null) newMovie.setTrailer(trailer.getOriginalFilename());
+
         return movieRepository.save(newMovie);
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public void deleteMovie(int id) {
+    public void deleteMovie(int id) throws IOException {
         log.info("Delete movie with id: {}", id);
 
-        getMovieById(id);
+        Movie movie = getMovieById(id);
+
+        String publicIdTrailer = "BookingCinema/Trailer/" + movie.getId();
+        String publicIdBanner = "BookingCinema/Banner/" + movie.getId() ;
 
         movieRepository.deleteById(id);
+
+        cloudinaryService.deleteVideo(publicIdTrailer);
+        cloudinaryService.deleteFile(publicIdBanner);
+
+        log.info("Delete banner, trailer of movie id {} successfully", id);
     }
 }

@@ -19,7 +19,9 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.List;
 
@@ -41,10 +43,13 @@ public class MovieController {
     @Operation(method = "POST", summary = "Create new movie",
             description = "Send a request via this API to create new movie")
     @PostMapping()
-    public ResponseEntity<?> createMovie(@Valid @RequestBody MovieRequest movieRequest) {
+    public ResponseEntity<?> createMovie(@Valid @RequestPart MovieRequest movieRequest,
+                                         @RequestParam("trailer") MultipartFile trailer,
+                                         @RequestParam("banner") MultipartFile banner
+    ) throws IOException {
         log.info("Create new movie");
 
-        Movie movie = movieService.createMovie(movieRequest);
+        Movie movie = movieService.createMovie(movieRequest, trailer, banner);
 
         MovieResponse movieResponse = movieMapper.toMovieResponse(movie);
 
@@ -142,10 +147,13 @@ public class MovieController {
             description = "Send a request via this API to update movie by Id")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateMovie(@PathVariable @Min(value = 1, message = "id must be greater than 0")  int id,
-                                         @Valid @RequestBody MovieRequest movieRequest) {
+                                         @Valid @RequestPart MovieRequest movieRequest,
+                                         @RequestParam("trailer") MultipartFile trailer,
+                                         @RequestParam("banner") MultipartFile banner
+    ) throws IOException {
         log.info("Update movie by Id: {}", id);;
 
-        Movie movie = movieService.updateMovie(id, movieRequest);
+        Movie movie = movieService.updateMovie(id, movieRequest, trailer, banner);
 
         MovieResponse movieResponse = movieMapper.toMovieResponse(movie);
 
@@ -163,7 +171,7 @@ public class MovieController {
     @Operation(method = "DELETE", summary = "Delete movie by Id",
             description = "Send a request via this API to delete movie by Id")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteMovie(@PathVariable @Min(value = 1, message = "id must be greater than 0")  int id) {
+    public ResponseEntity<?> deleteMovie(@PathVariable @Min(value = 1, message = "id must be greater than 0")  int id) throws IOException {
         log.info("Delete movie by Id: {}", id);;
 
         movieService.deleteMovie(id);

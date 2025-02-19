@@ -6,6 +6,7 @@ import com.vinhSeo.BookingCinema.exception.ErrorApp;
 import com.vinhSeo.BookingCinema.mapper.SeatMapper;
 import com.vinhSeo.BookingCinema.model.CinemaHall;
 import com.vinhSeo.BookingCinema.model.Seat;
+import com.vinhSeo.BookingCinema.model.SeatType;
 import com.vinhSeo.BookingCinema.repository.CinemaHallRepository;
 import com.vinhSeo.BookingCinema.repository.SeatRepository;
 import com.vinhSeo.BookingCinema.repository.SeatTypeRepository;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -88,6 +90,21 @@ public class SeatService {
         seat.setSeatStatus(!seat.getSeatStatus());
 
         return seatRepository.save(seat);
+    }
+
+    public List<Seat> changeSeatType(List<Integer> seats, Integer seatType) {
+        log.info("Change seat type by id: {}", seats);
+
+        List<Seat> seatList = seatRepository.findAllById(seats);
+
+        SeatType seatType1 = seatTypeRepository.findBySeatTypeId(seatType);
+
+        seatList.forEach(seat -> seat.setSeatType(seatType1));
+
+        List<Seat> updatedSeatList = seatRepository.saveAll(seatList);
+        log.info("Change seat type by id: {}", seats);
+
+        return updatedSeatList;
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")

@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 
 @Getter
 @Setter
@@ -18,6 +19,8 @@ public class CinemaResponse implements Serializable {
     Integer id;
     String address;
     String city;
+    BigDecimal latitude;
+    BigDecimal longitude;
     CinemaStatus cinemaStatus;
 
 }

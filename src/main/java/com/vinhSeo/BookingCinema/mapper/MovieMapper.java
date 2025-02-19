@@ -17,6 +17,8 @@ public interface MovieMapper {
     @Mapping(target = "status", expression = "java(buildStatus(request))")
     Movie toMovie(MovieRequest request);
 
+    @Mapping(target = "trailer", expression = "java(buildTrailer(movie))")
+    @Mapping(target = "banner", expression = "java(buildBanner(movie))")
     MovieResponse toMovieResponse(Movie movie);
 
     default Date buildStringToDate(MovieRequest request) {
@@ -36,6 +38,16 @@ public interface MovieMapper {
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid status value: " + request.getStatus());
         }
+    }
+
+    default String buildTrailer(Movie movie) {
+        return "https://res.cloudinary.com/dthlb2txt/image/upload/v1739962889/"
+                + "BookingCinema/Trailer/" + movie.getId() + "/" + movie.getTrailer();
+    }
+
+    default String buildBanner(Movie movie) {
+        return "https://res.cloudinary.com/dthlb2txt/image/upload/v1739962889/"
+                + "BookingCinema/Banner/" + movie.getId() + "/" + movie.getBanner();
     }
 
 }

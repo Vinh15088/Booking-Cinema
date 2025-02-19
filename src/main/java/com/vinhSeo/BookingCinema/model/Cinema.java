@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.math.BigDecimal;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -22,6 +23,12 @@ public class Cinema extends AbstractEntity<Integer> {
 
     @Column(name = "city", nullable = false)
     String city;
+
+    @Column(name = "latitude", nullable = false, precision = 10, scale = 7)
+    BigDecimal latitude;
+
+    @Column(name = "longitude", nullable = false, precision = 10, scale = 7)
+    BigDecimal longitude;
 
     @Column(name = "cinema_status")
     @Enumerated(EnumType.STRING)

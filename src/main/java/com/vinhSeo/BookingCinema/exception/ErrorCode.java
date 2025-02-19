@@ -12,6 +12,9 @@ public enum ErrorCode {
     ERROR_SEAT(1005, "Error seat"),
     ERROR_CINEMA_HALL(1006, "Error cinema hall"),
     ERROR_ROOM_TYPE(1007, "Error room type"),
+    ERROR_SHOW_TIME(1008, "Error show time"),
+    ERROR_SHOW_TIME_SEAT(1009, "Error show time seat"),
+
 
     ;
 

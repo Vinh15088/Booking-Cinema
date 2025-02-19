@@ -11,6 +11,7 @@ public enum ErrorApp {
 
     MOVIE_EXISTED("Movie is existed", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_MOVIE),
     MOVIE_NOT_FOUND("Movie is not found",HttpStatus.BAD_REQUEST, ErrorCode.ERROR_MOVIE),
+    MOVIE_ENDED("Movie is ended",HttpStatus.BAD_REQUEST, ErrorCode.ERROR_MOVIE),
 
     USER_USERNAME_EXISTED("Username is existed",HttpStatus.BAD_REQUEST, ErrorCode.ERROR_USER),
     USER_EMAIL_EXISTED("Email is existed",HttpStatus.BAD_REQUEST, ErrorCode.ERROR_USER),
@@ -27,10 +28,17 @@ public enum ErrorApp {
     SEAT_NOT_FOUND("Seat is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SEAT),
 
     CINEMA_HALL_NOT_FOUND("Cinema hall is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_CINEMA_HALL),
+    CINEMA_HALL_NOT_AVAILABLE("Cinema hall is not available", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_CINEMA_HALL),
     CINEMA_HALL_EXISTED_IN_CINEMA("Cinema hall is existed in cinema", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_CINEMA_HALL),
 
     ROOM_TYPE_NOT_FOUND("Room type is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_ROOM_TYPE),
 
+    SHOW_TIME_NOT_FOUND("Show time is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SHOW_TIME),
+    SHOW_TIME_EXISTED("Show time is existed", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SHOW_TIME),
+    SHOW_TIME_CONFLICT("Show time is conflict", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SHOW_TIME),
+
+    SHOW_TIME_SEAT_NOT_FOUND("Show time seat is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SHOW_TIME_SEAT),
+    SHOW_TIME_SEAT_STATUS_NOT_CORRECT("Show time seat status is not correct (AVAILABLE, PENDING, RESERVED)", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SHOW_TIME_SEAT),
 
 
 

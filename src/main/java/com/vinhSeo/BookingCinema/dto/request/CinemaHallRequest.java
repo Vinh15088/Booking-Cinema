@@ -1,6 +1,5 @@
 package com.vinhSeo.BookingCinema.dto.request;
 
-import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -21,10 +20,14 @@ public class CinemaHallRequest implements Serializable {
     @NotBlank(message = "name must be not blank")
     String name;
 
-    @NotNull(message = "totalSeats must be not null")
-    @Min(value = 1, message = "totalSeats is greater than 0")
-    @Max(value = 200, message = "totalSeats is less than 200")
-    Integer totalSeats;
+    @NotNull(message = "hallRow must be not null")
+    Integer hallRow;
+
+    @NotNull(message = "hallColumn must be not null")
+    Integer hallColumn;
+
+    @NotNull(message = "available must be not null")
+    Boolean available;
 
     @NotNull(message = "cinemaId must be not null")
     @Min(value = 1, message = "cinemaId is greater than 0")

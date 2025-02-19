@@ -17,7 +17,9 @@ public class CinemaHallResponse implements Serializable {
 
     Integer id;
     String name;
-    Integer totalSeats;
+    Integer hallRow;
+    Integer hallColumn;
+    Boolean available;
     JsonNode cinema;
     JsonNode roomType;
 

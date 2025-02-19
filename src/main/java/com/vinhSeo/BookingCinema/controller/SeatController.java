@@ -141,6 +141,30 @@ public class SeatController {
         return ResponseEntity.ok().body(dataApiResponse);
     }
 
+    @Operation(method = "PUT", summary = "Change seat type",
+            description = "Send a request via this API to change seat type")
+    @PutMapping("/change-seat-type")
+    public ResponseEntity<?> changeSeatType(
+            @RequestBody List<Integer> listId,
+            @RequestParam Integer seatType
+    ) {
+        log.info("Change seat type");
+
+        List<Seat> seats = seatService.changeSeatType(listId, seatType);
+
+        List<SeatResponse> seatResponses = seats.stream().map(seatMapper::toSeatResponse).toList();
+
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
+                .success(true)
+                .code(HttpStatus.ACCEPTED.value())
+                .timestamp(new Date())
+                .message("Change seat type successfully")
+                .data(seatResponses)
+                .build();
+
+        return ResponseEntity.ok().body(dataApiResponse);
+    }
+
     @Operation(method = "DELETE", summary = "Delete seat by Id",
             description = "Send a request via this API to delete seat by Id")
     @DeleteMapping("/{id}")

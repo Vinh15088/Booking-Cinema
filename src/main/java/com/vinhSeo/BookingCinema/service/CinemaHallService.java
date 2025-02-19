@@ -6,13 +6,13 @@ import com.vinhSeo.BookingCinema.exception.ErrorApp;
 import com.vinhSeo.BookingCinema.mapper.CinemaHallMapper;
 import com.vinhSeo.BookingCinema.model.Cinema;
 import com.vinhSeo.BookingCinema.model.CinemaHall;
-import com.vinhSeo.BookingCinema.repository.CinemaHallRepository;
-import com.vinhSeo.BookingCinema.repository.CinemaRepository;
-import com.vinhSeo.BookingCinema.repository.RoomTypeRepository;
+import com.vinhSeo.BookingCinema.model.Seat;
+import com.vinhSeo.BookingCinema.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -25,8 +25,38 @@ public class CinemaHallService {
     private final CinemaRepository cinemaRepository;
     private final RoomTypeRepository roomTypeRepository;
     private final CinemaHallMapper cinemaHallMapper;
+    private final SeatRepository seatRepository;
+    private final SeatTypeRepository seatTypeRepository;
+
+    @Transactional
+    protected void generateSeatsForShowTime(CinemaHall cinemaHall) {
+        int rows = cinemaHall.getHallRow();
+        int columns = cinemaHall.getHallColumn();
+
+        for (int row = 0; row < rows; row++) {
+            char rowChar = (char) ('A' + row);
+
+            int seatTypeId;
+            if (row < 4) seatTypeId = 1; // SeatType 1 (Standard)
+            else if (row == rows - 1) seatTypeId = 3; // SeatType 3 (Couple)
+            else seatTypeId = 2; // SeatType 2 (VIP)
+
+            for (int col = 1; col <= columns; col++) {
+                Seat seat = Seat.builder()
+                        .seatNumber(rowChar + String.valueOf(col))
+                        .seatStatus(true)
+                        .seatType(seatTypeRepository.findBySeatTypeId(seatTypeId))
+                        .cinemaHall(cinemaHall)
+                        .build();
+                seatRepository.save(seat);
+            }
+        }
+
+        log.info("Generated {} seats in cinema hall {}", rows * columns, cinemaHall.getId());
+    }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @Transactional
     public CinemaHall createCinemaHall(CinemaHallRequest request) {
         log.info("Create cinema hall");
 
@@ -40,7 +70,11 @@ public class CinemaHallService {
 
         CinemaHall cinemaHall = cinemaHallMapper.toCinemaHall(request, cinemaRepository, roomTypeRepository);
 
-        return cinemaHallRepository.save(cinemaHall);
+        cinemaHallRepository.save(cinemaHall);
+
+        generateSeatsForShowTime(cinemaHall);
+
+        return cinemaHall;
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
@@ -65,6 +99,7 @@ public class CinemaHallService {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @Transactional
     public CinemaHall updateCinemaHall(Integer id, CinemaHallRequest request) {
         log.info("Update cinema hall");
 
@@ -79,6 +114,13 @@ public class CinemaHallService {
         }
 
         CinemaHall updatedCinemaHall = cinemaHallMapper.toCinemaHall(request, cinemaRepository, roomTypeRepository);
+        updatedCinemaHall.setId(id);
+
+        if(request.getHallRow() != getCinemaHallById(id).getHallRow() || request.getHallColumn() != getCinemaHallById(id).getHallColumn()) {
+            seatRepository.deleteAllByCinemaHall(cinemaHall);
+
+            generateSeatsForShowTime(cinemaHall);
+        }
 
         updatedCinemaHall.setId(id);
 

@@ -5,7 +5,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Getter
 @Setter
@@ -46,4 +48,13 @@ public class Movie {
     @Enumerated(EnumType.STRING)
     @Column(name = "status")
     MovieStatus status;
+
+    @Column(name = "trailer")
+    String trailer;
+
+    @Column(name = "banner", nullable = false)
+    String banner;
+
+    @OneToMany(mappedBy = "movie")
+    List<ShowTime> showTimes = new ArrayList<>();
 }

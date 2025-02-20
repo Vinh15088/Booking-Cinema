@@ -15,10 +15,11 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 
 @Service
@@ -31,13 +32,13 @@ public class MovieService {
     private final CloudinaryService cloudinaryService;
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public Movie createMovie(MovieRequest request, MultipartFile trailer, MultipartFile banner) throws IOException {
+    @Transactional
+    public Movie createMovie(MovieRequest request, MultipartFile banner) throws IOException {
         log.info("Create new movie");
 
         if(movieRepository.existsByTitle(request.getTitle())) throw  new AppException(ErrorApp.MOVIE_EXISTED);
 
         Movie movie = movieMapper.toMovie(request);
-        movie.setTrailer(trailer.getOriginalFilename());
         movie.setBanner(banner.getOriginalFilename());
 
         if(request.getStatus() == null || request.getStatus().isEmpty()) {
@@ -46,14 +47,14 @@ public class MovieService {
 
         movieRepository.save(movie);
 
-        String folderTrailer = "BookingCinema/Trailer/" + movie.getId();
         String folderBanner = "BookingCinema/Banner/" + movie.getId();
 
-        log.info("folderTrailer: {}", folderTrailer);
         log.info("folderBanner: {}", folderBanner);
 
-        cloudinaryService.uploadFile(banner, folderBanner);
-        cloudinaryService.uploadVideo(trailer, folderTrailer);
+        CompletableFuture<Void> bannerUpload = cloudinaryService.uploadFileAsync(banner, folderBanner)
+                .thenAccept(result -> log.info("Banner uploaded successfully", result.get("secure_url")));
+
+        CompletableFuture.allOf(bannerUpload);
 
         return movie;
     }
@@ -93,26 +94,29 @@ public class MovieService {
         return result;
     }
 
+    @Transactional
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    public Movie updateMovie(int id, MovieRequest request, MultipartFile trailer, MultipartFile banner) throws IOException {
+    public Movie updateMovie(int id, MovieRequest request, MultipartFile banner) throws IOException {
         log.info("Update movie with id: {}", id);
 
         Movie movie = getMovieById(id);
-
         Movie newMovie = movieMapper.toMovie(request);
         newMovie.setId(id);
 
-        String folderTrailer = "BookingCinema/Trailer/" + movie.getId();
         String folderBanner = "BookingCinema/Banner/" + movie.getId();
-
-        String publicIdTrailer = folderTrailer + "/" + movie.getTrailer().substring(0, movie.getTrailer().lastIndexOf("."));
         String publicIdBanner = folderBanner + "/" + movie.getBanner().substring(0, movie.getBanner().lastIndexOf("."));
 
-        Map<String, String> updateFile = cloudinaryService.updateFile(banner, folderBanner, publicIdBanner);
-        Map<String, String> updateTrailer = cloudinaryService.updateVideo(trailer, folderTrailer, publicIdTrailer);
+        if(banner != null && !banner.getOriginalFilename().isEmpty()) {
+            newMovie.setBanner(banner.getOriginalFilename());
 
-        if(updateFile != null) newMovie.setBanner(banner.getOriginalFilename());
-        if(updateTrailer != null) newMovie.setTrailer(trailer.getOriginalFilename());
+            CompletableFuture<Void> updateFile = cloudinaryService.uploadFileAsync(banner, folderBanner)
+                    .thenAccept(result -> log.info("Update new banner successfully", result.get("secure_url")));
+
+            CompletableFuture<Void> deleteFile = cloudinaryService.deleteFile(publicIdBanner)
+                    .thenAccept(result -> log.info("Delete old banner successfully", result.get("secure_url")));
+
+            CompletableFuture.allOf(updateFile, deleteFile);
+        }
 
         return movieRepository.save(newMovie);
     }
@@ -123,13 +127,14 @@ public class MovieService {
 
         Movie movie = getMovieById(id);
 
-        String publicIdTrailer = "BookingCinema/Trailer/" + movie.getId();
         String publicIdBanner = "BookingCinema/Banner/" + movie.getId() ;
 
         movieRepository.deleteById(id);
 
-        cloudinaryService.deleteVideo(publicIdTrailer);
-        cloudinaryService.deleteFile(publicIdBanner);
+        CompletableFuture<Void> deleteFile = cloudinaryService.deleteFile(publicIdBanner)
+                .thenAccept(result -> log.info("Delete banner successfully", result.get("secure_url")));
+
+        CompletableFuture.allOf(deleteFile);
 
         log.info("Delete banner, trailer of movie id {} successfully", id);
     }

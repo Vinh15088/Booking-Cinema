@@ -10,10 +10,12 @@ import com.vinhSeo.BookingCinema.model.*;
 import com.vinhSeo.BookingCinema.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -28,6 +30,27 @@ public class ShowTimeService {
     private final CinemaHallRepository cinemaHallRepository;
     private final SeatRepository seatRepository;
     private final ShowTimeSeatRepository showTimeSeatRepository;
+
+    @Transactional
+    @Scheduled(cron = "0 0 3 * * ?", zone = "Asia/Ho_Chi_Minh")
+    // 0s 0m 3h *d *m
+    public void cleanExpiredShowTimes() {
+        log.info("Clean up expired show times");
+
+        LocalDateTime now = LocalDateTime.now();
+
+        List<ShowTime> expiredShowTimes = showTimeRepository.findByStartTimeBefore(now);
+
+        if(expiredShowTimes.size() > 0) {
+            log.info("Found {} expired show times", expiredShowTimes.size());
+
+            showTimeRepository.deleteAll(expiredShowTimes);
+
+            log.info("Deleted expired show times");
+        } else {
+            log.info("No expired show times found");
+        }
+    }
 
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")

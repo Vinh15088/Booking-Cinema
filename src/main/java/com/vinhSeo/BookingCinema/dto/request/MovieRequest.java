@@ -37,4 +37,7 @@ public class MovieRequest implements Serializable {
 
     @EnumValue(name = "movie_status", enumClass = MovieStatus.class)
     String status;
+
+    @NotBlank(message = "Url trailer must be  not blank")
+    String trailer;
 }

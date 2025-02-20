@@ -44,12 +44,11 @@ public class MovieController {
             description = "Send a request via this API to create new movie")
     @PostMapping()
     public ResponseEntity<?> createMovie(@Valid @RequestPart MovieRequest movieRequest,
-                                         @RequestParam("trailer") MultipartFile trailer,
                                          @RequestParam("banner") MultipartFile banner
     ) throws IOException {
         log.info("Create new movie");
 
-        Movie movie = movieService.createMovie(movieRequest, trailer, banner);
+        Movie movie = movieService.createMovie(movieRequest, banner);
 
         MovieResponse movieResponse = movieMapper.toMovieResponse(movie);
 
@@ -148,12 +147,11 @@ public class MovieController {
     @PutMapping("/{id}")
     public ResponseEntity<?> updateMovie(@PathVariable @Min(value = 1, message = "id must be greater than 0")  int id,
                                          @Valid @RequestPart MovieRequest movieRequest,
-                                         @RequestParam("trailer") MultipartFile trailer,
                                          @RequestParam("banner") MultipartFile banner
     ) throws IOException {
         log.info("Update movie by Id: {}", id);;
 
-        Movie movie = movieService.updateMovie(id, movieRequest, trailer, banner);
+        Movie movie = movieService.updateMovie(id, movieRequest, banner);
 
         MovieResponse movieResponse = movieMapper.toMovieResponse(movie);
 

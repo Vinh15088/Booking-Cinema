@@ -4,10 +4,10 @@ import com.vinhSeo.BookingCinema.enums.MovieStatus;
 import jakarta.persistence.*;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
 @Getter
 @Setter
@@ -16,12 +16,8 @@ import java.util.List;
 @NoArgsConstructor
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
-@Table(name = "movies")
-public class Movie {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    int id;
+@Table(name = "movie")
+public class Movie extends AbstractEntity<Integer> {
 
     @Column(name = "title", unique = true, nullable = false)
     String title;
@@ -57,4 +53,12 @@ public class Movie {
 
     @OneToMany(mappedBy = "movie")
     List<ShowTime> showTimes = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "movie_type_id")
+    @OnDelete(action = OnDeleteAction.CASCADE)
+    MovieType movieType;
+
+    @OneToMany(mappedBy = "movie")
+    List<Review> reviews = new ArrayList<>();
 }

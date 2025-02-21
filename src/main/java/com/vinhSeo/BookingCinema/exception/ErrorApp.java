@@ -12,6 +12,7 @@ public enum ErrorApp {
     MOVIE_EXISTED("Movie is existed", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_MOVIE),
     MOVIE_NOT_FOUND("Movie is not found",HttpStatus.BAD_REQUEST, ErrorCode.ERROR_MOVIE),
     MOVIE_ENDED("Movie is ended",HttpStatus.BAD_REQUEST, ErrorCode.ERROR_MOVIE),
+    MOVIE_TYPE_NOT_FOUND("Movie type is not found",HttpStatus.BAD_REQUEST, ErrorCode.ERROR_MOVIE),
 
     USER_USERNAME_EXISTED("Username is existed",HttpStatus.BAD_REQUEST, ErrorCode.ERROR_USER),
     USER_EMAIL_EXISTED("Email is existed",HttpStatus.BAD_REQUEST, ErrorCode.ERROR_USER),
@@ -40,7 +41,8 @@ public enum ErrorApp {
     SHOW_TIME_SEAT_NOT_FOUND("Show time seat is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SHOW_TIME_SEAT),
     SHOW_TIME_SEAT_STATUS_NOT_CORRECT("Show time seat status is not correct (AVAILABLE, PENDING, RESERVED)", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SHOW_TIME_SEAT),
 
-
+    REVIEW_EXISTED("Review is existed", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_REVIEW),
+    REVIEW_NOT_FOUND("Review is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_REVIEW),
 
     ;
 

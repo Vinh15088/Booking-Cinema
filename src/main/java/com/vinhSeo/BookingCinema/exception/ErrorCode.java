@@ -14,6 +14,7 @@ public enum ErrorCode {
     ERROR_ROOM_TYPE(1007, "Error room type"),
     ERROR_SHOW_TIME(1008, "Error show time"),
     ERROR_SHOW_TIME_SEAT(1009, "Error show time seat"),
+    ERROR_REVIEW(1000, "Error review"),
 
 
     ;

@@ -84,7 +84,7 @@ public class MovieController {
 
     @Operation(method = "GET", summary = "Get movie by Title",
             description = "Send a request via this API to get movie by Title")
-    @GetMapping()
+    @GetMapping("/title")
     public ResponseEntity<?> getMovieByTitle(@RequestParam String title) {
         log.info("Get movie by Title: {}", title);;
         Movie movie = movieService.getMovieByTitle(title);
@@ -96,6 +96,26 @@ public class MovieController {
                 .code(HttpStatus.OK.value())
                 .timestamp(new Date())
                 .message("Get movie by Title successfully")
+                .data(movieResponse)
+                .build();
+
+        return ResponseEntity.ok().body(dataApiResponse);
+    }
+
+    @Operation(method = "GET", summary = "Get movie by movie type",
+            description = "Send a request via this API to get movie by movie type")
+    @GetMapping("/movie-type")
+    public ResponseEntity<?> getMovieByMovieType(@RequestParam Integer movieTypeId) {
+        log.info("Get movie by movie type: {}", movieTypeId);;
+        Movie movie = movieService.getMovieByMovieType(movieTypeId);
+
+        MovieResponse movieResponse = movieMapper.toMovieResponse(movie);
+
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
+                .success(true)
+                .code(HttpStatus.OK.value())
+                .timestamp(new Date())
+                .message("Get movie by movie type successfully")
                 .data(movieResponse)
                 .build();
 

@@ -6,7 +6,9 @@ import com.vinhSeo.BookingCinema.exception.AppException;
 import com.vinhSeo.BookingCinema.exception.ErrorApp;
 import com.vinhSeo.BookingCinema.mapper.MovieMapper;
 import com.vinhSeo.BookingCinema.model.Movie;
+import com.vinhSeo.BookingCinema.model.MovieType;
 import com.vinhSeo.BookingCinema.repository.MovieRepository;
+import com.vinhSeo.BookingCinema.repository.MovieTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
@@ -30,6 +32,7 @@ public class MovieService {
     private final MovieRepository movieRepository;
     private final MovieMapper movieMapper;
     private final CloudinaryService cloudinaryService;
+    private final MovieTypeRepository movieTypeRepository;
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @Transactional
@@ -38,7 +41,7 @@ public class MovieService {
 
         if(movieRepository.existsByTitle(request.getTitle())) throw  new AppException(ErrorApp.MOVIE_EXISTED);
 
-        Movie movie = movieMapper.toMovie(request);
+        Movie movie = movieMapper.toMovie(request, movieTypeRepository);
         movie.setBanner(banner.getOriginalFilename());
 
         if(request.getStatus() == null || request.getStatus().isEmpty()) {
@@ -63,21 +66,29 @@ public class MovieService {
     public Movie getMovieById(int id) {
         log.info("Get movie by id: {}", id);
 
-        Movie movie = movieRepository.findById(id).orElseThrow(() ->
+        return movieRepository.findById(id).orElseThrow(() ->
                 new AppException(ErrorApp.MOVIE_NOT_FOUND));
-
-        return movie;
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public Movie getMovieByTitle(String title) {
         log.info("Get movie by title: {}", title);
 
-        Movie movie = movieRepository.findByTitle(title).orElseThrow(() ->
+        return movieRepository.findByTitle(title).orElseThrow(() ->
                 new AppException(ErrorApp.MOVIE_NOT_FOUND));
-
-        return movie;
     }
+
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
+    public Movie getMovieByMovieType(Integer movieTypeId) {
+        log.info("Get movie by movie type: {}", movieTypeId);
+
+        MovieType movieType = movieTypeRepository.findById(movieTypeId).orElseThrow(() ->
+                new AppException(ErrorApp.MOVIE_TYPE_NOT_FOUND));
+
+        return movieRepository.findMovieByMovieType(movieType);
+    }
+
+
 
     public Page<Movie> searchMovie(String keyword, Integer number, Integer size, String sortBy, String order) {
         log.info("Search movie with keyword: {}", keyword);
@@ -100,7 +111,7 @@ public class MovieService {
         log.info("Update movie with id: {}", id);
 
         Movie movie = getMovieById(id);
-        Movie newMovie = movieMapper.toMovie(request);
+        Movie newMovie = movieMapper.toMovie(request, movieTypeRepository);
         newMovie.setId(id);
 
         String folderBanner = "BookingCinema/Banner/" + movie.getId();

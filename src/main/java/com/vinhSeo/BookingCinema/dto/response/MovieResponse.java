@@ -1,5 +1,6 @@
 package com.vinhSeo.BookingCinema.dto.response;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
@@ -23,4 +24,6 @@ public class MovieResponse implements Serializable {
     String status;
     String trailer;
     String banner;
+
+    JsonNode movieType;
 }

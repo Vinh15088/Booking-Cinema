@@ -40,4 +40,7 @@ public class MovieRequest implements Serializable {
 
     @NotBlank(message = "Url trailer must be  not blank")
     String trailer;
+
+    @NotNull(message = "movieType must be not null")
+    Integer movieType;
 }

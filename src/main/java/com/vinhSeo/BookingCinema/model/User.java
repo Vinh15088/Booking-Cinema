@@ -49,6 +49,9 @@ public class User extends AbstractEntity<Integer> implements UserDetails, Serial
     @OneToMany(mappedBy = "user", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     Set<UserHasRole> roles = new HashSet<>();
 
+    @OneToMany(mappedBy = "user")
+    List<Review> reviews = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<Role> roleList = roles.stream().map(UserHasRole::getRole).toList();

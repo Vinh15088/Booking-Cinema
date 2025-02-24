@@ -52,6 +52,9 @@ public class User extends AbstractEntity<Integer> implements UserDetails, Serial
     @OneToMany(mappedBy = "user")
     List<Review> reviews = new ArrayList<>();
 
+    @OneToMany(mappedBy = "user")
+    List<Ticket> tickets = new ArrayList<>();
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<Role> roleList = roles.stream().map(UserHasRole::getRole).toList();

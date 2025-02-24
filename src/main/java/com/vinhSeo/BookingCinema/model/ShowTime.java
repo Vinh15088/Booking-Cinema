@@ -8,7 +8,9 @@ import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 import java.util.Set;
 
 @Setter
@@ -50,5 +52,8 @@ public class ShowTime extends AbstractEntity<Integer> {
 //    @OnDelete(action = OnDeleteAction.CASCADE)
     @OneToMany(mappedBy = "showTime", cascade = CascadeType.ALL, orphanRemoval = true)
     Set<ShowTimeSeat> showTimeSeats;
+
+    @OneToMany(mappedBy = "showTime")
+    List<Ticket> tickets = new ArrayList<>();
 
 }

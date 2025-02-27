@@ -17,9 +17,6 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class TicketRequest implements Serializable {
 
-    @NotNull(message = "user (Id) must be not null")
-    Integer user;
-
     @NotNull(message = "showTime (Id) must be not null")
     Integer showTime;
 

@@ -54,10 +54,9 @@ public class Movie extends AbstractEntity<Integer> {
     @OneToMany(mappedBy = "movie")
     List<ShowTime> showTimes = new ArrayList<>();
 
-    @ManyToOne
-    @JoinColumn(name = "movie_type_id")
+    @OneToMany(mappedBy = "movie")
     @OnDelete(action = OnDeleteAction.CASCADE)
-    MovieType movieType;
+    List<MovieHasMovieType> movieHasMovieTypes = new ArrayList<>();
 
     @OneToMany(mappedBy = "movie")
     List<Review> reviews = new ArrayList<>();

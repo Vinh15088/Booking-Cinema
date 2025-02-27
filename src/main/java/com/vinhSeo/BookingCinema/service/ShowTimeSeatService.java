@@ -35,6 +35,11 @@ public class ShowTimeSeatService {
 
     public ShowTimeSeat changeStatus(Integer id, String status) {
         ShowTimeSeat showTimeSeat = getById(id);
+        String showTimeSeatStatus = showTimeSeat.getShowTimeSeatStatus().toString();
+
+        if(showTimeSeatStatus.equals("RESERVED")) {
+            throw new AppException(ErrorApp.SHOW_TIME_SEAT_IS_RESERVED);
+        }
 
         status.toUpperCase();
 

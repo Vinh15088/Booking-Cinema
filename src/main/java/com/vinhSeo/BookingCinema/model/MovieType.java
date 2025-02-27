@@ -27,5 +27,5 @@ public class MovieType extends AbstractEntity<Integer> {
     String description;
 
     @OneToMany(mappedBy = "movieType")
-    List<Movie> movies = new ArrayList<>();
+    List<MovieHasMovieType> movieHasMovieTypes = new ArrayList<>();
 }

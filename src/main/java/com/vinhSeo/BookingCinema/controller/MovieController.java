@@ -36,7 +36,6 @@ public class MovieController {
     private final MovieService movieService;
     private final MovieMapper movieMapper;
 
-
     private static final String PAGE_SIZE = "10";
     private static final String PAGE_NUMBER = "1";
 
@@ -102,21 +101,24 @@ public class MovieController {
         return ResponseEntity.ok().body(dataApiResponse);
     }
 
-    @Operation(method = "GET", summary = "Get movie by movie type",
-            description = "Send a request via this API to get movie by movie type")
+    @Operation(method = "GET", summary = "Get all movie by movie type",
+            description = "Send a request via this API to get all movie by movie type")
     @GetMapping("/movie-type")
     public ResponseEntity<?> getMovieByMovieType(@RequestParam Integer movieTypeId) {
-        log.info("Get movie by movie type: {}", movieTypeId);;
-        Movie movie = movieService.getMovieByMovieType(movieTypeId);
+        log.info("Get all movie by movie type: {}", movieTypeId);
 
-        MovieResponse movieResponse = movieMapper.toMovieResponse(movie);
+
+
+        List<Movie> movies = movieService.getMovieByMovieType(movieTypeId);
+
+        List<MovieResponse> movieResponses = movies.stream().map(movieMapper::toMovieResponse).toList();
 
         DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
                 .code(HttpStatus.OK.value())
                 .timestamp(new Date())
-                .message("Get movie by movie type successfully")
-                .data(movieResponse)
+                .message("Get all movie by movie type successfully")
+                .data(movieResponses)
                 .build();
 
         return ResponseEntity.ok().body(dataApiResponse);

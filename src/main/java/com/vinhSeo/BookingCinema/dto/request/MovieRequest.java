@@ -10,6 +10,7 @@ import lombok.Setter;
 import lombok.experimental.FieldDefaults;
 
 import java.io.Serializable;
+import java.util.List;
 
 @Getter
 @Setter
@@ -41,6 +42,6 @@ public class MovieRequest implements Serializable {
     @NotBlank(message = "Url trailer must be  not blank")
     String trailer;
 
-    @NotNull(message = "movieType must be not null")
-    Integer movieType;
+    @NotEmpty(message = "movieType must be not empty")
+    List<Integer> movieType;
 }

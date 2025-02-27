@@ -6,7 +6,9 @@ import com.vinhSeo.BookingCinema.exception.AppException;
 import com.vinhSeo.BookingCinema.exception.ErrorApp;
 import com.vinhSeo.BookingCinema.mapper.MovieMapper;
 import com.vinhSeo.BookingCinema.model.Movie;
+import com.vinhSeo.BookingCinema.model.MovieHasMovieType;
 import com.vinhSeo.BookingCinema.model.MovieType;
+import com.vinhSeo.BookingCinema.repository.MovieHasMovieTypeRepository;
 import com.vinhSeo.BookingCinema.repository.MovieRepository;
 import com.vinhSeo.BookingCinema.repository.MovieTypeRepository;
 import lombok.RequiredArgsConstructor;
@@ -21,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -33,6 +36,7 @@ public class MovieService {
     private final MovieMapper movieMapper;
     private final CloudinaryService cloudinaryService;
     private final MovieTypeRepository movieTypeRepository;
+    private final MovieHasMovieTypeRepository movieHasMovieTypeRepository;
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
     @Transactional
@@ -50,6 +54,16 @@ public class MovieService {
 
         movieRepository.save(movie);
 
+        // store movie has movie type to db
+        List<MovieHasMovieType> movieHasMovieTypes = movie.getMovieHasMovieTypes();
+
+        for (MovieHasMovieType movieHasMovieType : movieHasMovieTypes) {
+            movieHasMovieType.setMovie(movie);
+        }
+
+        movieHasMovieTypeRepository.saveAll(movieHasMovieTypes);
+
+        // push banner image to cloudinary
         String folderBanner = "BookingCinema/Banner/" + movie.getId();
 
         log.info("folderBanner: {}", folderBanner);
@@ -79,13 +93,17 @@ public class MovieService {
     }
 
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
-    public Movie getMovieByMovieType(Integer movieTypeId) {
+    public List<Movie> getMovieByMovieType(Integer movieTypeId) {
         log.info("Get movie by movie type: {}", movieTypeId);
 
         MovieType movieType = movieTypeRepository.findById(movieTypeId).orElseThrow(() ->
                 new AppException(ErrorApp.MOVIE_TYPE_NOT_FOUND));
 
-        return movieRepository.findMovieByMovieType(movieType);
+        List<MovieHasMovieType> movieHasMovieTypes = movieHasMovieTypeRepository.findAllByMovieType(movieType);
+
+        List<Movie> movies = movieHasMovieTypes.stream().map(MovieHasMovieType::getMovie).toList();
+
+        return movies;
     }
 
 

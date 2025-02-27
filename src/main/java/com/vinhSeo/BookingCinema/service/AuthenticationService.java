@@ -63,8 +63,10 @@ public class AuthenticationService {
             }
         }
 
-        String accessToken = jwtService.generateAccessToken(userLoginRequest.getUsername(), authorities);
-        String refreshToken = jwtService.generateRefreshToken(userLoginRequest.getUsername(), authorities);
+        User user = userRepository.findByUsername(userLoginRequest.getUsername());
+
+        String accessToken = jwtService.generateAccessToken(user.getId(), userLoginRequest.getUsername(), user.getAuthorities());
+        String refreshToken = jwtService.generateRefreshToken(user.getId(), userLoginRequest.getUsername(), user.getAuthorities());
 
         // save token with redis
         RedisToken redisToken = RedisToken.builder()
@@ -97,7 +99,7 @@ public class AuthenticationService {
             List<String> authorities = new ArrayList<>();
             user.getAuthorities().forEach(authority -> authorities.add(authority.getAuthority()));
 
-            String accessToken = jwtService.generateAccessToken(username, authorities);
+            String accessToken = jwtService.generateAccessToken(user.getId(), username, user.getAuthorities());
 
             // save token with redis
             RedisToken redisToken = RedisToken.builder()

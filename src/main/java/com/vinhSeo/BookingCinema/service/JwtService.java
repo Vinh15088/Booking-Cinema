@@ -9,15 +9,13 @@ import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.AccessDeniedException;
 import java.security.Key;
 import java.security.SignatureException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 @Slf4j(topic = "JWT_SERVICE")
@@ -35,11 +33,15 @@ public class JwtService {
     @Value("${jwt.refreshKey}")
     private String REFRESH_KEY;
 
-    public String generateAccessToken(String username, List<String> authorities) throws Exception {
+    public String generateAccessToken(Integer userId, String username, Collection<? extends GrantedAuthority> authorities) throws Exception {
         log.info("Generate access token for user: {}, authorities {}", username, authorities);
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", authorities);
+        claims.put("id", userId);
+
+        List<String> roles = new ArrayList<>();
+        authorities.forEach(authority -> roles.add(authority.getAuthority()));
+        claims.put("role", roles);
 
         return Jwts.builder()
                 .setClaims(claims)
@@ -50,11 +52,15 @@ public class JwtService {
                 .compact();
     }
 
-    public String generateRefreshToken(String username, List<String> authorities) throws Exception {
+    public String generateRefreshToken(Integer userId, String username, Collection<? extends GrantedAuthority> authorities) throws Exception {
         log.info("Generate refresh token for user: {}, authorities {}", username, authorities);
 
         Map<String, Object> claims = new HashMap<>();
-        claims.put("role", authorities);
+        claims.put("id", userId);
+
+        List<String> roles = new ArrayList<>();
+        authorities.forEach(authority -> roles.add(authority.getAuthority()));
+        claims.put("role", roles);
 
         return Jwts.builder()
                 .setClaims(claims)

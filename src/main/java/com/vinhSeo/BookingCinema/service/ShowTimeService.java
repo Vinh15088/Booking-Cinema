@@ -31,7 +31,7 @@ public class ShowTimeService {
     private final SeatRepository seatRepository;
     private final ShowTimeSeatRepository showTimeSeatRepository;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     @Scheduled(cron = "0 0 3 * * ?", zone = "Asia/Ho_Chi_Minh")
     // 0s 0m 3h *d *m
     public void cleanExpiredShowTimes() {
@@ -54,7 +54,7 @@ public class ShowTimeService {
 
 
     @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public ShowTime createShowTime(ShowTimeRequest request) {
         log.info("Create new show time");
 

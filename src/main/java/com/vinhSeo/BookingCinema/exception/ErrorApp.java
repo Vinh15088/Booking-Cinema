@@ -40,6 +40,9 @@ public enum ErrorApp {
 
     SHOW_TIME_SEAT_NOT_FOUND("Show time seat is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SHOW_TIME_SEAT),
     SHOW_TIME_SEAT_STATUS_NOT_CORRECT("Show time seat status is not correct (AVAILABLE, PENDING, RESERVED)", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SHOW_TIME_SEAT),
+    SHOW_TIME_SEAT_IS_PENDING("Show time seat is pending status", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SHOW_TIME_SEAT),
+    SHOW_TIME_SEAT_IS_RESERVED("Show time seat is reserved status", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SHOW_TIME_SEAT),
+    SHOW_TIME_SEAT_NOT_AVAILABLE("Show time seat ís not available or already held by another user", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_SHOW_TIME_SEAT),
 
     REVIEW_EXISTED("Review is existed", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_REVIEW),
     REVIEW_NOT_FOUND("Review is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_REVIEW),
@@ -49,6 +52,8 @@ public enum ErrorApp {
 
     TICKET_NOT_FOUND("Ticket is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_TICKET),
     TICKET_EXISTED("Ticket is existed", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_TICKET),
+    REDIS_TICKET_NOT_FOUND("Redis ticket is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_TICKET),
+
 
     ;
 

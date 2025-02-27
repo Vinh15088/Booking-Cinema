@@ -5,6 +5,8 @@ import com.vinhSeo.BookingCinema.dto.response.DataApiResponse;
 import com.vinhSeo.BookingCinema.dto.response.ShowTimeResponse;
 import com.vinhSeo.BookingCinema.mapper.ShowTimeMapper;
 import com.vinhSeo.BookingCinema.model.ShowTime;
+import com.vinhSeo.BookingCinema.service.ShowTimeCacheService;
+import com.vinhSeo.BookingCinema.service.ShowTimeSeatService;
 import com.vinhSeo.BookingCinema.service.ShowTimeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -30,6 +32,7 @@ public class ShowTimeController {
 
     private final ShowTimeService showTimeService;
     private final ShowTimeMapper showTimeMapper;
+    private final ShowTimeCacheService showTimeCacheService;
 
     @Operation(method = "POST", summary = "Create new show time",
             description = "Send a request via this API to create new show time")
@@ -56,11 +59,20 @@ public class ShowTimeController {
     @GetMapping("/{id}")
     public ResponseEntity<?> getShowTimeById(
             @PathVariable @Min(value = 1, message = "id must be greater than 0")  Integer id) {
-        log.info("Get show time by Id");;
+        log.info("Get show time by Id");
 
-        ShowTime showTime = showTimeService.getShowTimeById(id);
+        ShowTimeResponse showTimeResponse = showTimeCacheService.getCachedShowTime(id);
 
-        ShowTimeResponse showTimeResponse = showTimeMapper.toShowTimeResponse(showTime);
+        if(showTimeResponse == null) {
+            log.info("Show time response in redis cache is null");
+
+            ShowTime showTime = showTimeService.getShowTimeById(id);
+
+            showTimeResponse = showTimeMapper.toShowTimeResponse(showTime);
+
+            showTimeCacheService.cacheShowTime(id, showTimeResponse);
+        }
+
 
         DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
@@ -78,11 +90,19 @@ public class ShowTimeController {
     @GetMapping("/list-with-movie")
     public ResponseEntity<?> getAllShowTimeWithMovie(
             @RequestParam @Min(value = 1, message = "id must be greater than 0")  Integer movieId) {
-        log.info("Get all show time with movie");;
+        log.info("Get all show time with movie");
 
-        List<ShowTime> showTimeList = showTimeService.getShowTimesByMovie(movieId);
+        List<ShowTimeResponse> showTimeResponseList = showTimeCacheService.getCachedShowTimesByMovie(movieId);
 
-        List<ShowTimeResponse> showTimeResponseList = showTimeList.stream().map(showTimeMapper::toShowTimeResponse).toList();
+        if(showTimeResponseList == null) {
+            log.info("Show time response in redis cache is empty");
+
+            List<ShowTime> showTimeList = showTimeService.getShowTimesByMovie(movieId);
+
+            showTimeResponseList = showTimeList.stream().map(showTimeMapper::toShowTimeResponse).toList();
+
+            showTimeCacheService.cacheShowTimeByMovie(movieId, showTimeResponseList);
+        }
 
         DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
@@ -101,11 +121,14 @@ public class ShowTimeController {
     public ResponseEntity<?> updateShowTime(
             @PathVariable @Min(value = 1, message = "id must be greater than 0")  Integer id,
             @Valid @RequestBody ShowTimeRequest showTimeRequest) {
-        log.info("Update show time by Id");;
+        log.info("Update show time by Id");
 
         ShowTime showTime = showTimeService.updateShowTime(id, showTimeRequest);
 
         ShowTimeResponse showTimeResponse = showTimeMapper.toShowTimeResponse(showTime);
+
+        showTimeCacheService.evictShowTimeCache(id);
+        showTimeCacheService.cacheShowTime(id, showTimeResponse);
 
         DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
@@ -125,6 +148,7 @@ public class ShowTimeController {
         log.info("Delete show time by Id");;
 
         showTimeService.deleteShowTime(id);
+        showTimeCacheService.evictShowTimeCache(id);
 
         DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)

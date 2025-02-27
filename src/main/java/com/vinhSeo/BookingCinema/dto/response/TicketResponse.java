@@ -20,7 +20,6 @@ public class TicketResponse implements Serializable {
     Integer id;
     Integer totalAmount;
     Date bookingDate;
-    JsonNode user;
     JsonNode showTime;
     List<TicketDetailResponse> ticketDetailResponses;
 }

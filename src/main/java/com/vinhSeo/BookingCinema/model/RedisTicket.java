@@ -20,9 +20,9 @@ public class RedisTicket implements Serializable {
     @Id
     Integer userId;
 
-    String bookingId;
+    String transCode;
     Integer price;
-
     Integer showTimeId;
+    Integer paymentStatus;
     List<TicketDetailRequest> ticketDetailRequests;
 }

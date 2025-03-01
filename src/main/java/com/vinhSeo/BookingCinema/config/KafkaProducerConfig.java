@@ -44,4 +44,8 @@ public class KafkaProducerConfig {
         return new NewTopic("VERIFY_EMAIL_TOPIC", 3, (short) 1);
     }
 
+    @Bean NewTopic PaymentSuccess() {
+        return new NewTopic("PAYMENT_SUCCESS_TOPIC", 3, (short) 1);
+    }
+
 }

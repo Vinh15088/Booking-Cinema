@@ -37,4 +37,7 @@ public class Ticket extends AbstractEntity<Integer> {
     @OnDelete(action = OnDeleteAction.CASCADE)
     List<TicketDetail> ticketDetails;
 
+    @OneToOne(mappedBy = "ticket")
+    Payment payment;
+
 }

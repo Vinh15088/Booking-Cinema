@@ -46,6 +46,7 @@ public enum ErrorApp {
 
     REVIEW_EXISTED("Review is existed", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_REVIEW),
     REVIEW_NOT_FOUND("Review is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_REVIEW),
+    REVIEW_ACCESS_DENIED("Review access denied", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_REVIEW),
 
     TICKET_PRICE_EXISTED("Ticket price is existed", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_TICKET_PRICE),
     TICKET_PRICE_NOT_FOUND("Ticket price is not found", HttpStatus.BAD_REQUEST, ErrorCode.ERROR_TICKET_PRICE),

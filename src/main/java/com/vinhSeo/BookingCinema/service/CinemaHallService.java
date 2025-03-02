@@ -10,7 +10,6 @@ import com.vinhSeo.BookingCinema.model.Seat;
 import com.vinhSeo.BookingCinema.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,7 +27,6 @@ public class CinemaHallService {
     private final SeatRepository seatRepository;
     private final SeatTypeRepository seatTypeRepository;
 
-    @Transactional
     protected void generateSeatsForShowTime(CinemaHall cinemaHall) {
         int rows = cinemaHall.getHallRow();
         int columns = cinemaHall.getHallColumn();
@@ -55,8 +53,7 @@ public class CinemaHallService {
         log.info("Generated {} seats in cinema hall {}", rows * columns, cinemaHall.getId());
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public CinemaHall createCinemaHall(CinemaHallRequest request) {
         log.info("Create cinema hall");
 
@@ -77,7 +74,6 @@ public class CinemaHallService {
         return cinemaHall;
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public CinemaHall getCinemaHallById(Integer id) {
         log.info("Get cinema hall by id: {}", id);
 
@@ -85,7 +81,6 @@ public class CinemaHallService {
                 new AppException(ErrorApp.CINEMA_HALL_NOT_FOUND));
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public List<CinemaHall> getAllCinemaHall(String keyword) {
         if(keyword != null && !keyword.isEmpty() && !keyword.isBlank()) {
             log.info("Get cinema hall by keyword: {}", keyword);
@@ -98,8 +93,7 @@ public class CinemaHallService {
         }
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public CinemaHall updateCinemaHall(Integer id, CinemaHallRequest request) {
         log.info("Update cinema hall");
 
@@ -127,7 +121,6 @@ public class CinemaHallService {
         return cinemaHallRepository.save(updatedCinemaHall);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public void deleteCinemaHall(Integer id) {
         log.info("Delete cinema hall");
 

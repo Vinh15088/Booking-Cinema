@@ -17,7 +17,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -38,8 +37,7 @@ public class MovieService {
     private final MovieTypeRepository movieTypeRepository;
     private final MovieHasMovieTypeRepository movieHasMovieTypeRepository;
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public Movie createMovie(MovieRequest request, MultipartFile banner) throws IOException {
         log.info("Create new movie");
 
@@ -76,7 +74,6 @@ public class MovieService {
         return movie;
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public Movie getMovieById(int id) {
         log.info("Get movie by id: {}", id);
 
@@ -84,7 +81,6 @@ public class MovieService {
                 new AppException(ErrorApp.MOVIE_NOT_FOUND));
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public Movie getMovieByTitle(String title) {
         log.info("Get movie by title: {}", title);
 
@@ -92,7 +88,6 @@ public class MovieService {
                 new AppException(ErrorApp.MOVIE_NOT_FOUND));
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public List<Movie> getMovieByMovieType(Integer movieTypeId) {
         log.info("Get movie by movie type: {}", movieTypeId);
 
@@ -105,8 +100,6 @@ public class MovieService {
 
         return movies;
     }
-
-
 
     public Page<Movie> searchMovie(String keyword, Integer number, Integer size, String sortBy, String order) {
         log.info("Search movie with keyword: {}", keyword);
@@ -123,8 +116,7 @@ public class MovieService {
         return result;
     }
 
-    @Transactional
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @Transactional(rollbackFor = Exception.class)
     public Movie updateMovie(int id, MovieRequest request, MultipartFile banner) throws IOException {
         log.info("Update movie with id: {}", id);
 
@@ -150,7 +142,7 @@ public class MovieService {
         return movieRepository.save(newMovie);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
+    @Transactional(rollbackFor = Exception.class)
     public void deleteMovie(int id) throws IOException {
         log.info("Delete movie with id: {}", id);
 

@@ -1,7 +1,10 @@
 package com.vinhSeo.BookingCinema.service;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.vinhSeo.BookingCinema.dto.request.TicketDetailRequest;
 import com.vinhSeo.BookingCinema.dto.request.TicketRequest;
+import com.vinhSeo.BookingCinema.enums.PaymentMethod;
 import com.vinhSeo.BookingCinema.exception.AppException;
 import com.vinhSeo.BookingCinema.exception.ErrorApp;
 import com.vinhSeo.BookingCinema.mapper.TicketDetailMapper;
@@ -10,13 +13,11 @@ import com.vinhSeo.BookingCinema.model.*;
 import com.vinhSeo.BookingCinema.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
-import java.util.concurrent.ThreadLocalRandom;
-import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j(topic = "TICKET_SERVICE")
@@ -32,48 +33,41 @@ public class TicketService {
     private final ShowTimeSeatRepository showTimeSeatRepository;
     private final UserRepository userRepository;
     private final ShowTimeSeatService showTimeSeatService;
+    private final PaymentService paymentService;
+    private final RedisShowTimeSeatService redisShowTimeSeatService;
     private final RedisTicketRepository redisTicketRepository;
 
-    private final RedisTemplate<String, Object> redisTemplate;
-
-    private static final String SHOW_TIME_SEAT_CACHE = "showtime_seat:";
-    private static final Integer TTL = 10; // minutes
-
-    public void setShowTimeSeatCache(Integer userId, Integer showTimeSeatId, String statusShowTimeSeat) {
-        log.info("Push show time seat to cache");
-
-        String key = SHOW_TIME_SEAT_CACHE + userId + ":" + showTimeSeatId;
-
-        redisTemplate.opsForValue().set(key, statusShowTimeSeat, TTL, TimeUnit.MINUTES);
-    }
-
-    public String getShowTimeSeatCache(Integer userId, Integer showTimeSeatId) {
-        log.info("Get show time seat from cache");
-
-        String key = SHOW_TIME_SEAT_CACHE + userId + ":" + showTimeSeatId;
-
-        return (String) redisTemplate.opsForValue().get(key);
-    }
-
-    public void deleteAllHeldSeatsByUser(Integer userId) {
-        log.info("Delete show time seat from cache");
-
-        String pattern = SHOW_TIME_SEAT_CACHE + userId + ":*";
-        Set<String> keys = redisTemplate.keys(pattern);
-
-        if(keys != null && !keys.isEmpty()) {
-            redisTemplate.delete(keys);
-        }
-    }
 
     @Transactional(rollbackFor = Exception.class)
-    public Ticket createTicket(Integer userId, TicketRequest ticketRequest) {
+    @KafkaListener(topics = "PAYMENT_SUCCESS_TOPIC", groupId = "PAYMENT_SUCCESS_GROUP")
+    public Ticket createTicket(JsonNode message) {
         log.info("Create ticket");
+
+        // get info in kafka message
+        Integer userId = message.get("userId").asInt();
+        String transitionId = message.get("transitionId").asText();
+        Integer price = message.get("price").asInt();
+        Integer showTimeId = message.get("showTimeId").asInt();
+
+        List<TicketDetailRequest> ticketDetailRequests = new ArrayList<>();
+
+        ArrayNode arrayNode = (ArrayNode) message.get("ticketDetailRequests");
+
+        for(JsonNode detailRequest : arrayNode) {
+            TicketDetailRequest request = new TicketDetailRequest();
+            request.setShowTimeSeatId(detailRequest.asInt());
+
+            ticketDetailRequests.add(request);
+        }
+
+        TicketRequest ticketRequest = TicketRequest.builder()
+                .showTime(showTimeId)
+                .ticketDetailRequests(ticketDetailRequests)
+                .build();
 
         User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorApp.USER_NOT_FOUND));
 
-        List<TicketDetailRequest> ticketDetailRequests = ticketRequest.getTicketDetailRequests();
-
+        // change status RESERVED in db -> booking successfully
         for(TicketDetailRequest request:ticketDetailRequests) {
             showTimeSeatService.changeStatus(request.getShowTimeSeatId(), "RESERVED");
         }
@@ -81,108 +75,35 @@ public class TicketService {
         Ticket ticket = ticketMapper.toTicket(ticketRequest, showTimeRepository,
                 ticketDetailMapper, showTimeSeatRepository, ticketPriceRepository);
         ticket.setUser(user);
-
-        Integer price = ticket.getTicketDetails().stream().mapToInt(detail -> detail.getPrice()).sum();
         ticket.setTotalAmount(price);
-
-        ticketDetailRepository.saveAll(ticket.getTicketDetails());
-
         ticket.setBookingDate(new Date());
+
+        // save ticket detail in db
+        ticketDetailRepository.saveAll(ticket.getTicketDetails());
 
         if (ticket.getTicketDetails() != null) {
             ticket.getTicketDetails().forEach(detail -> detail.setTicket(ticket));
         }
 
-        return ticketRepository.save(ticket);
-    }
-
-    public RedisTicket holdSeat(Integer userId, TicketRequest ticketRequest) {
-        log.info("Hold seat");
-
-        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorApp.USER_NOT_FOUND));
-
-        List<TicketDetailRequest> ticketDetailRequests = ticketRequest.getTicketDetailRequests();
-
-        deleteAllHeldSeatsByUser(userId);
-
-        if (!isAvailable(userId, ticketDetailRequests)) {
-            throw new AppException(ErrorApp.SHOW_TIME_SEAT_NOT_AVAILABLE);
-        }
-
-
-        // solve price
-        Ticket ticket = ticketMapper.toTicket(ticketRequest, showTimeRepository,
-                ticketDetailMapper, showTimeSeatRepository, ticketPriceRepository);
-        ticket.setUser(user);
-
-        Integer price = ticket.getTicketDetails().stream().mapToInt(detail -> detail.getPrice()).sum();
-
-        // generate bookingId
-        String bookingId = String.valueOf(ThreadLocalRandom.current().nextLong(1000000000L, 9999999999L));
-
-        // push redisTicket to redis
-        log.info("Save Redis Ticket with user id: {}", userId);
-        RedisTicket redisTicket = RedisTicket.builder()
-                .userId(userId)
-                .bookingId(bookingId)
+        // save payment
+        Payment payment = Payment.builder()
+                .ticket(ticket)
                 .price(price)
-                .ticketDetailRequests(ticketDetailRequests)
-                .showTimeId(ticketRequest.getShowTime())
+                .status(true)
+                .transactionId(transitionId)
+                .paymentDate(new Date())
+                .paymentMethod(PaymentMethod.ZALOPAY)
                 .build();
 
-        return redisTicketRepository.save(redisTicket);
-    }
+        paymentService.createPayment(payment);
 
-    public boolean isAvailable(Integer userId, List<TicketDetailRequest> ticketDetailRequests) {
+        // delete show time seat of user in redis after booking successfully
+        redisShowTimeSeatService.deleteAllHeldSeatsByUser(userId);
 
-        List<ShowTimeSeat> showTimeSeats = new ArrayList<>();
+        // delete redis ticket of user
+        redisTicketRepository.deleteById(userId);
 
-        for(TicketDetailRequest request:ticketDetailRequests) {
-            ShowTimeSeat showTimeSeat = showTimeSeatRepository.findById(request.getShowTimeSeatId()).orElseThrow(()
-                    -> new AppException(ErrorApp.SHOW_TIME_SEAT_NOT_FOUND));
-
-            // check showTimeSeat in redis
-            String status = getShowTimeSeatCache(userId, showTimeSeat.getId());
-            if (status != null && status.equals("PENDING")) {
-                log.info("Seat {} is already held by another user", request.getShowTimeSeatId());
-                return false;
-            }
-
-            log.info("Show time seat status: {}", showTimeSeat.getShowTimeSeatStatus().toString());
-
-            if(showTimeSeat.getShowTimeSeatStatus().toString().equals("AVAILABLE")) {
-                showTimeSeats.add(showTimeSeat);
-            }
-
-        }
-
-        // check all show
-        if(ticketDetailRequests.size() == showTimeSeats.size()) {
-            for(ShowTimeSeat showTimeSeat:showTimeSeats) {
-                setShowTimeSeatCache(userId, showTimeSeat.getId(), "PENDING");
-            }
-
-            return true;
-        }
-
-        return false;
-    }
-
-    public void cancelHoldSeat(Integer userId) {
-        log.info("Cancel hold seat");
-
-        RedisTicket redisTicket = redisTicketRepository.findById(userId).orElseThrow(()
-                -> new AppException(ErrorApp.REDIS_TICKET_NOT_FOUND));
-
-        List<TicketDetailRequest> ticketDetailRequests = redisTicket.getTicketDetailRequests();
-
-        // delete all previous showTimeSeat of user
-        for(TicketDetailRequest request:ticketDetailRequests) {
-            String key = SHOW_TIME_SEAT_CACHE + userId + ":" + request.getShowTimeSeatId();
-            redisTemplate.delete(key);
-        }
-
-        redisTicketRepository.delete(redisTicket);
+        return ticketRepository.save(ticket);
     }
 
     public Ticket getById(Integer id) {
@@ -194,14 +115,16 @@ public class TicketService {
     public List<Ticket> getAllTickets(Integer userId, Integer showTimeId) {
         log.info("Get all tickets or by userId={}, showTimeId={}", userId, showTimeId);
 
-        if (userId != null) {
+        // get ticket by user
+        if (userId != null && showTimeId == null) {
             log.info("Fetching tickets by userId={}", userId);
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new AppException(ErrorApp.USER_NOT_FOUND));
             return ticketRepository.findAllByUser(user);
         }
 
-        if (showTimeId != null) {
+        // get ticket by show time id
+        if (showTimeId != null && userId != null) {
             log.info("Fetching tickets by showTimeId={}", showTimeId);
             ShowTime showTime = showTimeRepository.findById(showTimeId)
                     .orElseThrow(() -> new AppException(ErrorApp.SHOW_TIME_NOT_FOUND));

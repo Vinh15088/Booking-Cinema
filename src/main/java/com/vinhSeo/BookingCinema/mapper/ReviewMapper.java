@@ -19,20 +19,12 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface ReviewMapper {
 
-    @Mapping(target = "user", expression = "java(buildUser(request, userRepository))")
     @Mapping(target = "movie", expression = "java(buildMovie(request, movieRepository))")
-    Review toReview(ReviewRequest request,
-                    @Context UserRepository userRepository,
-                    @Context MovieRepository movieRepository);
+    Review toReview(ReviewRequest request, @Context MovieRepository movieRepository);
 
     @Mapping(target = "user", expression = "java(buildUserJson(review))")
     @Mapping(target = "movie", expression = "java(buildMovieJson(review))")
     ReviewResponse toReviewResponse(Review review);
-
-    default User buildUser(ReviewRequest request, @Context UserRepository userRepository) {
-        return userRepository.findById(request.getUser()).orElseThrow(() ->
-                new AppException(ErrorApp.USER_NOT_FOUND));
-    }
 
     default Movie buildMovie(ReviewRequest request, @Context MovieRepository movieRepository) {
         return movieRepository.findById(request.getMovie()).orElseThrow(() ->

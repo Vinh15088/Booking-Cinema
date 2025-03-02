@@ -14,7 +14,6 @@ public class ReviewRequest implements Serializable {
 
     Integer rating;
     String comment;
-    Integer user;
     Integer movie;
 
 }

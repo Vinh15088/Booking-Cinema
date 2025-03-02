@@ -23,7 +23,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.kafka.core.KafkaTemplate;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -39,7 +38,7 @@ public class UserService {
     private final MailService mailService;
     private final KafkaTemplate<String, JsonNode> kafkaTemplate;
 
-    @Transactional
+    @Transactional(rollbackFor = Exception.class)
     public User createUser(UserCreateRequest userCreateRequest) throws MessagingException {
         log.info("Creating user: {}", userCreateRequest.getUsername());
 
@@ -80,14 +79,12 @@ public class UserService {
         return result;
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN','USER')")
     public User getUserById(Integer id) {
         log.info("Getting user by id: {}", id);
 
         return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorApp.USER_NOT_FOUND));
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public Page<User> searchUser(String keyword, Integer number, Integer size, String sortBy, String order) {
         log.info("Searching user with keyword {}", keyword);
 
@@ -103,7 +100,6 @@ public class UserService {
         return result;
     }
 
-    @PreAuthorize("hasAnyAuthority('USER')")
     public User updateUser(Integer id, UserUpdateRequest userUpdateRequest) {
         log.info("Updating user with id {}", id);
 
@@ -118,11 +114,10 @@ public class UserService {
         return userRepository.save(newUser);
     }
 
-    @PreAuthorize("hasAnyAuthority('USER')")
-    public User changePassword(UserPasswordRequest userPasswordRequest) {
-        log.info("Changing password for user: {}", userPasswordRequest.getId());
+    public User changePassword(Integer userId, UserPasswordRequest userPasswordRequest) {
+        log.info("Changing password for user: {}", userId);
 
-        User user = getUserById(userPasswordRequest.getId());
+        User user = getUserById(userId);
 
         if(!passwordEncoder.matches(userPasswordRequest.getOldPassword(), user.getPassword())) {
             throw new AppException(ErrorApp.USER_OLD_PASSWORD);
@@ -141,7 +136,6 @@ public class UserService {
         return userRepository.save(user);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public void deleteUser(Integer id) {
         log.info("Deleting user with id: {}", id);
 

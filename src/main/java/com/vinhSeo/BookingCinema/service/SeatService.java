@@ -12,10 +12,8 @@ import com.vinhSeo.BookingCinema.repository.SeatRepository;
 import com.vinhSeo.BookingCinema.repository.SeatTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -28,7 +26,6 @@ public class SeatService {
     private final CinemaHallRepository cinemaHallRepository;
     private final SeatMapper seatMapper;
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public Seat createNewSeat(SeatRequest seatRequest) {
         log.info("Create new seat");
 
@@ -45,7 +42,6 @@ public class SeatService {
         return seatRepository.save(seat);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public Seat getSeatById(Integer seatId) {
         log.info("Get seat by id: {}", seatId);
 
@@ -53,14 +49,12 @@ public class SeatService {
                 new AppException(ErrorApp.SEAT_NOT_FOUND));
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public List<Seat> getAllSeatsInCinemaHall(Integer cinemaHallId) {
         log.info("Get all seats in Cinema hall: {}", cinemaHallId);
 
         return seatRepository.getAllSeatInCinemaHall(cinemaHallId);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public Seat updateSeat(Integer seatId, SeatRequest seatRequest) {
         log.info("Update seat by id: {}", seatId);
 
@@ -81,7 +75,6 @@ public class SeatService {
         return seatRepository.save(updatedSeat);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public Seat changeSeatStatus(Integer seatId) {
         log.info("Change seat status by id: {}", seatId);
 
@@ -107,7 +100,6 @@ public class SeatService {
         return updatedSeatList;
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public void deleteSeat(Integer seatId) {
         log.info("Delete seat by id: {}", seatId);
 

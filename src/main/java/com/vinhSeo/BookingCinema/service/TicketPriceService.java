@@ -16,7 +16,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 
@@ -30,7 +29,6 @@ public class TicketPriceService {
     private final RoomTypeRepository roomTypeRepository;
     private final SeatTypeRepository seatTypeRepository;
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public TicketPrice createTicketPrice(TicketPriceRequest request) {
         log.info("Create ticket price");
 
@@ -49,7 +47,6 @@ public class TicketPriceService {
         return ticketPriceRepository.save(ticketPrice);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public TicketPrice getById(Integer id) {
         log.info("Get ticket price by id: {}", id);
 
@@ -57,7 +54,6 @@ public class TicketPriceService {
                 new AppException(ErrorApp.TICKET_PRICE_NOT_FOUND));
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public Page<TicketPrice> getAll(Integer size, Integer number, String sortBy, String order) {
         log.info("Get ticket price all");
 
@@ -68,7 +64,6 @@ public class TicketPriceService {
         return ticketPriceRepository.findAll(pageable);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public TicketPrice updateTicketPrice(Integer id, Integer price) {
         log.info("Update ticket price by id: {}", id);
 
@@ -78,7 +73,6 @@ public class TicketPriceService {
         return ticketPriceRepository.save(ticketPrice);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public void deleteTicketPrice(Integer id) {
         log.info("Delete ticket price by id: {}", id);
 

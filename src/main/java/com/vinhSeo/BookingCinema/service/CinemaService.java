@@ -8,7 +8,6 @@ import com.vinhSeo.BookingCinema.model.Cinema;
 import com.vinhSeo.BookingCinema.repository.CinemaRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,7 +20,6 @@ public class CinemaService {
     private final CinemaRepository cinemaRepository;
     private final CinemaMapper cinemaMapper;
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public Cinema createNewCinema(CinemaRequest cinemaRequest) {
         log.info("Create new cinema");
 
@@ -30,7 +28,6 @@ public class CinemaService {
         return cinemaRepository.save(cinema);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public Cinema getCinemaById(Integer id) {
         log.info("Get cinema by id");
 
@@ -44,7 +41,6 @@ public class CinemaService {
         return cinemaRepository.findAll();
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public Cinema updateCinema(Integer id, CinemaRequest cinemaRequest) {
         log.info("Update cinema");
 
@@ -57,7 +53,6 @@ public class CinemaService {
         return cinemaRepository.save(cinemaUpdate);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public void deleteCinema(Integer id) {
         log.info("Delete cinema by id");
 

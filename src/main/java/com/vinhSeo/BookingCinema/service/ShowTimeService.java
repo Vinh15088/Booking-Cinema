@@ -11,7 +11,6 @@ import com.vinhSeo.BookingCinema.repository.*;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -53,7 +52,6 @@ public class ShowTimeService {
     }
 
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     @Transactional(rollbackFor = Exception.class)
     public ShowTime createShowTime(ShowTimeRequest request) {
         log.info("Create new show time");
@@ -105,7 +103,6 @@ public class ShowTimeService {
         return showTime;
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public ShowTime getShowTimeById(Integer id) {
         log.info("Get show time by id");
 
@@ -113,7 +110,6 @@ public class ShowTimeService {
                 new AppException(ErrorApp.SHOW_TIME_NOT_FOUND));
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN', 'USER')")
     public List<ShowTime> getShowTimesByMovie(Integer movieId) {
         log.info("Get show time by movie");
 
@@ -123,7 +119,6 @@ public class ShowTimeService {
         return showTimeRepository.getShowTimesByMovie(movie);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public ShowTime updateShowTime(Integer id, ShowTimeRequest request) {
         log.info("Update show time");
 
@@ -153,7 +148,6 @@ public class ShowTimeService {
         return showTimeRepository.save(updatedShowTime);
     }
 
-    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public void deleteShowTime(Integer id) {
         log.info("Delete show time");
 

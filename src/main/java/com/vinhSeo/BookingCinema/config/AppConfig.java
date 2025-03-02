@@ -17,7 +17,6 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -30,6 +29,7 @@ public class AppConfig {
 
     private final String[] publicEnpoints = {
             "/auth/**",
+            "/payment/**"
 
     };
 
@@ -43,6 +43,20 @@ public class AppConfig {
                         .requestMatchers(publicEnpoints).permitAll()
                         .requestMatchers(HttpMethod.POST, "/user/register").permitAll()
                         .requestMatchers(HttpMethod.GET, "/movie/list").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/movie/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/movie/title").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/movie/movie-type").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/cinema/list").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/cinema/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/cinema-hall/list").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/cinema-hall/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/review/list-by-movie").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/review/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/show-time/{id}").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/show-time/list-by-movie").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/show-time-seat/list").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/show-time-seat/{id}").permitAll()
+
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(new CustomAuthenticationEntryPoint()))

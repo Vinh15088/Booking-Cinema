@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +34,7 @@ public class SeatController {
 
     @Operation(method = "POST", summary = "Create new seat",
             description = "Send a request via this API to create new seat")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @PostMapping()
     public ResponseEntity<?> createSeat(@Valid @RequestBody SeatRequest seatRequest) {
         log.info("Create new seat");
@@ -53,6 +55,7 @@ public class SeatController {
 
     @Operation(method = "GET", summary = "Get seat by Id",
             description = "Send a request via this API to get seat by Id")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getSeatById(
             @PathVariable @Min(value = 1, message = "id must be greater than 0")  Integer id) {
@@ -75,6 +78,7 @@ public class SeatController {
 
     @Operation(method = "GET", summary = "Get all seats in cinema hall",
             description = "Send a request via this API to get all seats in cinema hall")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @GetMapping("/list")
     public ResponseEntity<?> getAllSeatsInCinemaHall(
             @RequestParam @Min(value = 1, message = "id must be greater than 0")  Integer cinemaHallId) {
@@ -97,6 +101,7 @@ public class SeatController {
 
     @Operation(method = "PUT", summary = "Update seat by Id",
             description = "Send a request via this API to update seat by Id")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateSeat(
             @PathVariable @Min(value = 1, message = "id must be greater than 0")  Integer id,
@@ -120,6 +125,7 @@ public class SeatController {
 
     @Operation(method = "PUT", summary = "Change seat status",
             description = "Send a request via this API to change seat status")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @PutMapping("/change-seat-status/{id}")
     public ResponseEntity<?> changeSeatStatus(
             @PathVariable @Min(value = 1, message = "id must be greater than 0") Integer id
@@ -143,6 +149,7 @@ public class SeatController {
 
     @Operation(method = "PUT", summary = "Change seat type",
             description = "Send a request via this API to change seat type")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @PutMapping("/change-seat-type")
     public ResponseEntity<?> changeSeatType(
             @RequestBody List<Integer> listId,
@@ -167,6 +174,7 @@ public class SeatController {
 
     @Operation(method = "DELETE", summary = "Delete seat by Id",
             description = "Send a request via this API to delete seat by Id")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSeat(@PathVariable @Min(value = 1, message = "id must be greater than 0")  Integer id) {
         log.info("Delete seat by Id");;

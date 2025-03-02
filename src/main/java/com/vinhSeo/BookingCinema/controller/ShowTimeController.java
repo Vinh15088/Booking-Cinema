@@ -6,7 +6,6 @@ import com.vinhSeo.BookingCinema.dto.response.ShowTimeResponse;
 import com.vinhSeo.BookingCinema.mapper.ShowTimeMapper;
 import com.vinhSeo.BookingCinema.model.ShowTime;
 import com.vinhSeo.BookingCinema.service.ShowTimeCacheService;
-import com.vinhSeo.BookingCinema.service.ShowTimeSeatService;
 import com.vinhSeo.BookingCinema.service.ShowTimeService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,6 +36,7 @@ public class ShowTimeController {
 
     @Operation(method = "POST", summary = "Create new show time",
             description = "Send a request via this API to create new show time")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @PostMapping()
     public ResponseEntity<?> createShowTime(@Valid @RequestBody ShowTimeRequest showTimeRequest) {
         log.info("Create new show time");
@@ -117,6 +118,7 @@ public class ShowTimeController {
 
     @Operation(method = "PUT", summary = "Update show time by Id",
             description = "Send a request via this API to update show time by Id")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateShowTime(
             @PathVariable @Min(value = 1, message = "id must be greater than 0")  Integer id,
@@ -143,6 +145,7 @@ public class ShowTimeController {
 
     @Operation(method = "DELETE", summary = "Delete show time by Id",
             description = "Send a request via this API to delete show time by Id")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteShowTime(@PathVariable @Min(value = 1, message = "id must be greater than 0")  Integer id) {
         log.info("Delete show time by Id");;

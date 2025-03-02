@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -33,6 +34,7 @@ public class CinemaHallController {
 
     @Operation(method = "POST", summary = "Create new cinema hall",
             description = "Send a request via this API to create new cinema hall")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     @PostMapping()
     public ResponseEntity<?> createCinemaHall(@Valid @RequestBody CinemaHallRequest cinemaHallRequest) {
         log.info("Create new cinema hall");
@@ -96,6 +98,7 @@ public class CinemaHallController {
 
     @Operation(method = "PUT", summary = "Update cinema hall by Id",
             description = "Send a request via this API to update cinema hall by Id")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateCinemaHall(
             @PathVariable @Min(value = 1, message = "id must be greater than 0")  Integer id,
@@ -119,6 +122,7 @@ public class CinemaHallController {
 
     @Operation(method = "DELETE", summary = "Delete cinema hall by Id",
             description = "Send a request via this API to delete cinema hall by Id")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteSeat(@PathVariable @Min(value = 1, message = "id must be greater than 0")  Integer id) {
         log.info("Delete cinema hall by Id");;

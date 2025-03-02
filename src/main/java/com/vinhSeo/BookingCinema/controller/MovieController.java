@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -41,6 +42,7 @@ public class MovieController {
 
     @Operation(method = "POST", summary = "Create new movie",
             description = "Send a request via this API to create new movie")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @PostMapping()
     public ResponseEntity<?> createMovie(@Valid @RequestPart MovieRequest movieRequest,
                                          @RequestParam("banner") MultipartFile banner
@@ -107,8 +109,6 @@ public class MovieController {
     public ResponseEntity<?> getMovieByMovieType(@RequestParam Integer movieTypeId) {
         log.info("Get all movie by movie type: {}", movieTypeId);
 
-
-
         List<Movie> movies = movieService.getMovieByMovieType(movieTypeId);
 
         List<MovieResponse> movieResponses = movies.stream().map(movieMapper::toMovieResponse).toList();
@@ -167,6 +167,7 @@ public class MovieController {
     @Operation(method = "PUT", summary = "Update movie by Id",
             description = "Send a request via this API to update movie by Id")
     @PutMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     public ResponseEntity<?> updateMovie(@PathVariable @Min(value = 1, message = "id must be greater than 0")  int id,
                                          @Valid @RequestPart MovieRequest movieRequest,
                                          @RequestParam("banner") MultipartFile banner
@@ -191,6 +192,7 @@ public class MovieController {
     @Operation(method = "DELETE", summary = "Delete movie by Id",
             description = "Send a request via this API to delete movie by Id")
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     public ResponseEntity<?> deleteMovie(@PathVariable @Min(value = 1, message = "id must be greater than 0")  int id) throws IOException {
         log.info("Delete movie by Id: {}", id);;
 

@@ -1,10 +1,10 @@
 package com.vinhSeo.BookingCinema.controller;
 
-import com.vinhSeo.BookingCinema.dto.request.CinemaRequest;
 import com.vinhSeo.BookingCinema.dto.request.ReviewRequest;
 import com.vinhSeo.BookingCinema.dto.response.*;
 import com.vinhSeo.BookingCinema.mapper.ReviewMapper;
 import com.vinhSeo.BookingCinema.model.Review;
+import com.vinhSeo.BookingCinema.model.User;
 import com.vinhSeo.BookingCinema.service.ReviewService;
 import com.vinhSeo.BookingCinema.utils.PageInfo;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -40,10 +41,11 @@ public class ReviewController {
     @Operation(method = "POST", summary = "Create new review",
             description = "Send a request via this API to create new review")
     @PostMapping()
-    public ResponseEntity<?> createReview(@Valid @RequestBody ReviewRequest reviewRequest) {
+    public ResponseEntity<?> createReview(@AuthenticationPrincipal User user,
+            @Valid @RequestBody ReviewRequest reviewRequest) {
         log.info("Create new review");
 
-        Review review = reviewService.createReview(reviewRequest);
+        Review review = reviewService.createReview(user.getId(), reviewRequest);
 
         ReviewResponse reviewResponse = reviewMapper.toReviewResponse(review);
 
@@ -83,7 +85,7 @@ public class ReviewController {
             description = "Send a request via this API to get all reviews by user.")
     @GetMapping("/list-by-user")
     public ResponseEntity<?> getAllByUser(
-            @RequestParam(name = "userId") Integer userId,
+            @AuthenticationPrincipal User user,
             @RequestParam(name = "size", defaultValue = PAGE_SIZE) Integer size,
             @RequestParam(name = "number", defaultValue = PAGE_NUMBER) Integer number,
             @RequestParam(name = "sortBy", defaultValue = "id") String sortBy,
@@ -91,7 +93,7 @@ public class ReviewController {
     ) {
         log.info("Get all reviews by user");
 
-        Page<Review> reviewPage = reviewService.getAllByUser(userId, number-1, size, sortBy, order);
+        Page<Review> reviewPage = reviewService.getAllByUser(user.getId(), number-1, size, sortBy, order);
 
         List<Review> reviewList = reviewPage.getContent();
 
@@ -162,12 +164,13 @@ public class ReviewController {
     @Operation(method = "PUT", summary = "Update review by Id",
             description = "Send a request via this API to update review by Id")
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateReview(@PathVariable @Min(value = 1, message = "id must be greater than 0")  int id,
+    public ResponseEntity<?> updateReview(@AuthenticationPrincipal User user,
+                                          @PathVariable @Min(value = 1, message = "id must be greater than 0")  int id,
                                           @Valid @RequestBody ReviewRequest request // rating, comment
     ) {
         log.info("Update movie by Id: {}", id);;
 
-        Review review = reviewService.updateReview(id, request);
+        Review review = reviewService.updateReview(id, user.getId(), request);
 
         ReviewResponse reviewResponse = reviewMapper.toReviewResponse(review);
 
@@ -185,10 +188,11 @@ public class ReviewController {
     @Operation(method = "DELETE", summary = "Delete review by Id",
             description = "Send a request via this API to delete review by Id")
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteMovie(@PathVariable @Min(value = 1, message = "id must be greater than 0")  int id) throws IOException {
+    public ResponseEntity<?> deleteMovie(@AuthenticationPrincipal User user,
+                                         @PathVariable @Min(value = 1, message = "id must be greater than 0")  int id) throws IOException {
         log.info("Delete review by Id: {}", id);;
 
-        reviewService.deleteReview(id);
+        reviewService.deleteReview(id, user.getId());
 
         DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)

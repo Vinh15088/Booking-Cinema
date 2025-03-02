@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -67,6 +68,7 @@ public class ShowTimeSeatController {
 
     @Operation(method = "PUT", summary = "Change status show time seat",
             description = "Send a request via this API to change status show time seat")
+    @PreAuthorize("hasAnyAuthority('USER')")
     @PutMapping("/change-status")
     public ResponseEntity<?> changeStatus(
             @RequestParam @Min(value = 1, message = "id must be greater than 0")  Integer id,

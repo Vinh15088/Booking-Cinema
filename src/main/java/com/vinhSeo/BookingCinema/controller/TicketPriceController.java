@@ -18,6 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -43,6 +44,7 @@ public class TicketPriceController {
 
     @Operation(method = "POST", summary = "Create new ticket price",
             description = "Send a request via this API to create new ticket price")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @PostMapping()
     public ResponseEntity<?> createTicketPrice(@Valid @RequestBody TicketPriceRequest ticketPriceRequest) {
         log.info("Create new ticket price");
@@ -63,6 +65,7 @@ public class TicketPriceController {
 
     @Operation(method = "GET", summary = "Get ticket price by id",
             description = "Send a request via this API to get ticket price by id")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @GetMapping("/{id}")
     public ResponseEntity<?> getTicketPriceById(
             @PathVariable @Min(value = 1, message = "id must be greater than 0")  Integer id) {
@@ -84,6 +87,7 @@ public class TicketPriceController {
 
     @Operation(method = "GET", summary = "Get all ticket price with optional pagination",
             description = "Send a request via this API to get all ticket price. You can optionally paginate.")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @GetMapping("/list")
     public ResponseEntity<?> getAllTicketPrice(
             @RequestParam(name = "size", defaultValue = PAGE_SIZE) Integer size,
@@ -124,6 +128,7 @@ public class TicketPriceController {
 
     @Operation(method = "PUT", summary = "Update price of ticket price by Id",
             description = "Send a request via this API to update price of ticket price by Id")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @PutMapping("/{id}")
     public ResponseEntity<?> updateTicketPrice(@PathVariable @Min(value = 1, message = "id must be greater than 0")  int id,
                                         @RequestParam Integer price) {
@@ -146,6 +151,7 @@ public class TicketPriceController {
 
     @Operation(method = "DELETE", summary = "Delete ticket price by Id",
             description = "Send a request via this API to delete ticket price by Id")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'MANAGER', 'EMPLOYEE')")
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteTicketPrice(@PathVariable @Min(value = 1, message = "id must be greater than 0")  Integer id) {
         log.info("Delete ticket price by Id");

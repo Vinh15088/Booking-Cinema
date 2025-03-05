@@ -2,14 +2,17 @@ server:
   port: 8080
 
 spring:
+  jackson:
+    time-zone: GMT+7
+
   config:
     activate:
       on-profile: dev
 
   datasource:
-    url: jdbc:mysql://localhost:3306/booking_cinema
-    username: root
-    password: Vl121620.
+    url: jdbc:mysql://${MYSQL_HOST:localhost}:3306/booking_cinema
+    username: ${MYSQL_USER:root}
+    password: ${MYSQL_PASSWORD:Vl121620.}
     driver-class-name: com.mysql.cj.jdbc.Driver
 
   jpa:
@@ -20,6 +23,35 @@ spring:
     properties:
       hibernate:
         format_sql: true
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+#      host: ${REDIS_HOST:redis-15987.c334.asia-southeast2-1.gce.redns.redis-cloud.com}
+#      port: ${REDIS_PORT:15987}
+#      username: ${REDIS_USERNAME:default}
+#      password: ${REDIS_PASSWORD:zBfQRJCKLGkCBewi3jH4SKvQiaOGnq9h}
+
+  kafka:
+    bootstrap-servers: ${KAFKA_HOST:localhost}:${KAFKA_PORT:29092}
+    producer:
+      properties:
+        max.request.size: 10485760 #10MB
+        fetch.max.bytes: 10485760
+        max.partition.fetch.bytes: 10485760
+        buffer.memory: 16777216
+
+
+  cloudinary:
+    cloud-name: ${CLOUDINARY_NAME:dthlb2txt}
+    api-key: ${CLOUDINARY_API_KEY:457682188489763}
+    secret-key: ${CLOUDINARY_SECRET_KEY:tmwawye9jutKIZX63MIuaKfy6Hc}
+
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 # OpenAPI - Swagger
 openapi:
@@ -34,3 +66,19 @@ openapi:
 #    enabled: true
 #  swagger-ui:
 #    enabled: true
+
+jwt:
+  secretKey: dev@12345
+  expiryMinutes: 300
+  expiryDay: 14
+  accessKey: ${JWT_ACCESS_KEY:9ArFXUmmRUZlWtvhVr3I7ryL48QsE0AakGRdc3qfGhWGVy23hdBY8Ro9d/S1sVCe5KQHyFAx+YtP9PCGwv4Nsg==}
+  refreshKey: ${JWT_REFRESH_KEY:MvsbX1u73zwkYUAgKBlCh7XR31fpkpmHdpMfVEk7Y0UKpcc3j0YIGS2z7JSd2OLiYYmWVjiYbHp+c3d2qdhv1A==}
+
+#Zalo pay
+zalo-pay:
+  app_id: ${ZALOPAY_APP_ID:2554}
+  key1: ${ZALOPAY_KEY1:sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn}
+  key2: ${ZALOPAY_KEY2:trMrHtvjo6myautxDUiAcYsVtaeQ8nhf}
+  endpoint: https://sb-openapi.zalopay.vn/v2
+  redirect_url: https://36cd-2405-4803-fe1f-8b00-6457-da57-8c16-59d.ngrok-free.app/payment/redirect-from-zalopay
+  callback_url: https://36cd-2405-4803-fe1f-8b00-6457-da57-8c16-59d.ngrok-free.app/payment/zalo-pay/callback

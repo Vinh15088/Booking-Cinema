@@ -8,6 +8,7 @@ import org.springframework.data.redis.connection.RedisStandaloneConfiguration;
 import org.springframework.data.redis.connection.jedis.JedisConnectionFactory;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.repository.configuration.EnableRedisRepositories;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 
 @Configuration
 @Slf4j(topic = "REDIS_CONFIG")
@@ -20,6 +21,12 @@ public class RedisConfig {
     @Value("${spring.data.redis.port}")
     private int REDIS_PORT;
 
+//    @Value("${spring.data.redis.username}")
+//    private String REDIS_USERNAME;
+//
+//    @Value("${spring.data.redis.password}")
+//    private String REDIS_PASSWORD;
+
     @Bean
     public JedisConnectionFactory jedisConnectionFactory() {
         log.info("Connecting to Redis: {}:{}", REDIS_HOST, REDIS_PORT);
@@ -27,6 +34,8 @@ public class RedisConfig {
         RedisStandaloneConfiguration redisStandaloneConfiguration = new RedisStandaloneConfiguration();
         redisStandaloneConfiguration.setHostName(REDIS_HOST);
         redisStandaloneConfiguration.setPort(REDIS_PORT);
+//        redisStandaloneConfiguration.setUsername(REDIS_USERNAME);
+//        redisStandaloneConfiguration.setPassword(REDIS_PASSWORD);
 
         return new JedisConnectionFactory(redisStandaloneConfiguration);
     }
@@ -35,8 +44,10 @@ public class RedisConfig {
     public RedisTemplate<String, Object> redisTemplate() {
         RedisTemplate<String, Object> redisTemplate = new RedisTemplate<>();
         redisTemplate.setConnectionFactory(jedisConnectionFactory());
-        log.info("Connected to Redis: {}:{}", REDIS_HOST, REDIS_PORT);
+        redisTemplate.setKeySerializer(new StringRedisSerializer());
+        redisTemplate.setHashKeySerializer(new StringRedisSerializer());
 
+        log.info("Connected to Redis: {}:{}", REDIS_HOST, REDIS_PORT);
 
         return redisTemplate;
     }

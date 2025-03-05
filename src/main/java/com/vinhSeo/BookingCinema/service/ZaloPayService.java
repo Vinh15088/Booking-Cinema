@@ -222,6 +222,7 @@ public class ZaloPayService {
     }
 
     public Boolean checkRedirect(Map<String, String> data) throws InvalidKeyException, NoSuchAlgorithmException, URISyntaxException, IOException {
+        log.info("Check redirect Zalopay");
         String checksumData = data.get("appid") +"|"+ data.get("apptransid") +"|"+ data.get("pmcid") +"|"+
                 data.get("bankcode") +"|"+ data.get("amount") +"|"+ data.get("discountamount") +"|"+ data.get("status");
 
@@ -231,11 +232,13 @@ public class ZaloPayService {
         byte[] checksumBytes = hmacSHA256.doFinal(checksumData.getBytes());
         String checksum = DatatypeConverter.printHexBinary(checksumBytes).toLowerCase();
 
-        if(checksum.equals(checksumData)) {
+        if(checksum.equals(data.get("checksum"))) {
             String appTransId = data.get("apptransid");
             RedisTicket redisTicket = redisTicketRepository.findByBookingId(appTransId);
 
             if(redisTicket.getPaymentStatus() != 1) {
+                log.info("Payment status not success");
+
                 JsonNode result = orderStatus(appTransId);
 
                 Integer returnCode = result.get("return_code").asInt();
@@ -259,6 +262,8 @@ public class ZaloPayService {
                     node.put("ticketDetailRequests", arrayNode);
                     kafkaTemplate.send("PAYMENT_SUCCESS_TOPIC", node);
                 } else {
+                    log.info("Payment successfully");
+
                     // delete redis ticket
                     redisTicketRepository.deleteById(redisTicket.getUserId());
 

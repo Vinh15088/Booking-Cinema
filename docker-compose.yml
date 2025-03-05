@@ -24,6 +24,7 @@ services:
     hostname: redis
     ports:
       - '6379:6379'
+    restart: always
     environment:
       - ALLOW_EMPTY_PASSWORD=yes
       - REDIS_DISABLE_COMMANDS=FLUSHDB;FLUSHALL
@@ -42,6 +43,7 @@ services:
   kafka:
     image: confluentinc/cp-kafka:latest
     container_name: kafka
+    restart: always
     depends_on:
       - zookeeper
     ports:
@@ -57,15 +59,35 @@ services:
 
 
   api-service-0:
-    container_name: api-container-0
+    container_name: backend-service
     build:
       context: ./
       dockerfile: Dockerfile
     #    image: api-image-sample
     environment:
-      API_TITLE: API docs dev
+      - SPRING_PROFILES_ACTIVE=dev
+      - API_TITLE=API docs dev
+      - MYSQL_HOST=mysql
+      - MYSQL_USER=root
+      - MYSQL_PASSWORD=Vl121620.
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - KAFKA_HOST=kafka
+      - KAFKA_PORT=29092
+      - CLOUDINARY_NAME=dthlb2txt
+      - CLOUDINARY_API_KEY=457682188489763
+      - CLOUDINARY_SECRET_KEY=tmwawye9jutKIZX63MIuaKfy6Hc
+      - JWT_ACCESS_KEY=9ArFXUmmRUZlWtvhVr3I7ryL48QsE0AakGRdc3qfGhWGVy23hdBY8Ro9d/S1sVCe5KQHyFAx+YtP9PCGwv4Nsg==
+      - JWT_REFRESH_KEY=MvsbX1u73zwkYUAgKBlCh7XR31fpkpmHdpMfVEk7Y0UKpcc3j0YIGS2z7JSd2OLiYYmWVjiYbHp+c3d2qdhv1A==
+      - ZALOPAY_APP_ID=2554
+      - ZALOPAY_KEY1=sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn
+      - ZALOPAY_KEY2=trMrHtvjo6myautxDUiAcYsVtaeQ8nhf
     ports:
       - '8080:8080'
+    depends_on:
+      - mysql
+      - redis
+      - kafka
     networks:
       - backend
 

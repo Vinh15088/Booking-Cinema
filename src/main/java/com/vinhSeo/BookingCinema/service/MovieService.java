@@ -13,6 +13,8 @@ import com.vinhSeo.BookingCinema.repository.MovieRepository;
 import com.vinhSeo.BookingCinema.repository.MovieTypeRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.cache.annotation.CachePut;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -38,7 +40,7 @@ public class MovieService {
     private final MovieHasMovieTypeRepository movieHasMovieTypeRepository;
 
     @Transactional(rollbackFor = Exception.class)
-    public Movie createMovie(MovieRequest request, MultipartFile banner) throws IOException {
+    public Movie createMovie(MovieRequest request, MultipartFile banner) {
         log.info("Create new movie");
 
         if(movieRepository.existsByTitle(request.getTitle())) throw  new AppException(ErrorApp.MOVIE_EXISTED);
@@ -74,7 +76,9 @@ public class MovieService {
         return movie;
     }
 
-    public Movie getMovieById(int id) {
+    @Transactional
+    @Cacheable(value = "movie", key = "#id")
+    public Movie getMovieById(Integer id) {
         log.info("Get movie by id: {}", id);
 
         return movieRepository.findById(id).orElseThrow(() ->
@@ -117,7 +121,8 @@ public class MovieService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public Movie updateMovie(int id, MovieRequest request, MultipartFile banner) throws IOException {
+    @CachePut(value = "movie", key = "#id")
+    public Movie updateMovie(Integer id, MovieRequest request, MultipartFile banner) throws IOException {
         log.info("Update movie with id: {}", id);
 
         Movie movie = getMovieById(id);

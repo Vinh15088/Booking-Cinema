@@ -8,9 +8,11 @@ import com.vinhSeo.BookingCinema.exception.AppException;
 import com.vinhSeo.BookingCinema.exception.ErrorApp;
 import com.vinhSeo.BookingCinema.exception.InvalidDataException;
 import com.vinhSeo.BookingCinema.exception.ResourceNotFoundException;
+import com.vinhSeo.BookingCinema.model.BlackListToken;
 import com.vinhSeo.BookingCinema.model.RedisMailConfirm;
 import com.vinhSeo.BookingCinema.model.RedisToken;
 import com.vinhSeo.BookingCinema.model.User;
+import com.vinhSeo.BookingCinema.repository.BlackListTokenRepository;
 import com.vinhSeo.BookingCinema.repository.RedisMailConfirmRepository;
 import com.vinhSeo.BookingCinema.repository.UserRepository;
 import io.micrometer.common.util.StringUtils;
@@ -38,8 +40,9 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final RedisTokenService redisTokenService;
     private final RedisMailConfirmRepository redisMailConfirmRepository;
+    private final BlackListTokenRepository blackListTokenRepository;
 
-    public TokenResponse getAccessToken(UserLoginRequest userLoginRequest) throws Exception {
+    public TokenResponse login(UserLoginRequest userLoginRequest) throws Exception {
         log.info("Get access token");
 
         List<String> authorities = new ArrayList<>();
@@ -80,6 +83,39 @@ public class AuthenticationService {
                 .accessToken(accessToken)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    public void logOut(String accessToken, String refreshToken, User user) throws Exception {
+        log.info("Logout by user: {}", user.getId());
+
+        String username = jwtService.extractUsername(refreshToken, TokenType.REFRESH_TOKEN);
+
+        if(!user.getUsername().equals(username)) {
+            throw new Exception("Invalid refresh token");
+        }
+
+        BlackListToken blackListAccessToken = BlackListToken.builder()
+                .id(jwtService.extractId(accessToken, TokenType.ACCESS_TOKEN))
+                .token(accessToken)
+                .tokenType(TokenType.ACCESS_TOKEN)
+                .expiredAt(jwtService.extractExpiration(accessToken, TokenType.ACCESS_TOKEN))
+                .build();
+
+        BlackListToken blackListRefreshToken = BlackListToken.builder()
+                .id(jwtService.extractId(refreshToken, TokenType.REFRESH_TOKEN))
+                .token(refreshToken)
+                .tokenType(TokenType.REFRESH_TOKEN)
+                .expiredAt(jwtService.extractExpiration(refreshToken, TokenType.REFRESH_TOKEN))
+                .build();
+
+        blackListTokenRepository.saveAll(List.of(blackListAccessToken, blackListRefreshToken));
+
+        // clear authentication from securityContextHolder
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if(authentication != null) {
+            SecurityContextHolder.clearContext();
+            log.info("Logged out by user: {}", authentication.getPrincipal());
+        }
     }
 
     public TokenResponse getRefreshToken(HttpServletRequest request) throws Exception {

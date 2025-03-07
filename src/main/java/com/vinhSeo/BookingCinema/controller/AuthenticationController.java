@@ -4,6 +4,7 @@ import com.vinhSeo.BookingCinema.dto.request.UserLoginRequest;
 import com.vinhSeo.BookingCinema.dto.response.DataApiResponse;
 import com.vinhSeo.BookingCinema.dto.response.TokenResponse;
 import com.vinhSeo.BookingCinema.model.RedisToken;
+import com.vinhSeo.BookingCinema.model.User;
 import com.vinhSeo.BookingCinema.service.AuthenticationService;
 import com.vinhSeo.BookingCinema.service.RedisTokenService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Date;
@@ -34,14 +36,34 @@ public class AuthenticationController {
     public ResponseEntity<?> getAccessToken(@RequestBody UserLoginRequest userLoginRequest) throws Exception {
         log.info("Get access token");
 
-        TokenResponse tokenResponse = authenticationService.getAccessToken(userLoginRequest);
+        TokenResponse tokenResponse = authenticationService.login(userLoginRequest);
 
         DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
                 .success(true)
-                .code(HttpStatus.CREATED.value())
+                .code(HttpStatus.OK.value())
                 .timestamp(new Date())
                 .message("Token created successfully")
                 .data(tokenResponse)
+                .build();
+
+        return ResponseEntity.ok().body(dataApiResponse);
+    }
+
+    @PostMapping("/logout")
+    @Operation(method = "POST", summary = "Logout by user",
+            description = "Send a request via this API to logout account by user")
+    public ResponseEntity<?> logout(@RequestParam String refreshToken,
+                                    @AuthenticationPrincipal User user,
+                                    @RequestHeader("Authorization") String header) throws Exception {
+        String accessToken = header.substring(7);
+
+        authenticationService.logOut(accessToken, refreshToken, user);
+
+        DataApiResponse<?> dataApiResponse = DataApiResponse.builder()
+                .success(true)
+                .code(HttpStatus.OK.value())
+                .timestamp(new Date())
+                .message("Logout successfully")
                 .build();
 
         return ResponseEntity.ok().body(dataApiResponse);

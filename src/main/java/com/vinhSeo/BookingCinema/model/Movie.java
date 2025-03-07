@@ -7,6 +7,7 @@ import lombok.experimental.FieldDefaults;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.io.Serializable;
 import java.util.*;
 
 @Getter
@@ -17,7 +18,7 @@ import java.util.*;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "movie")
-public class Movie extends AbstractEntity<Integer> {
+public class Movie extends AbstractEntity<Integer> implements Serializable {
 
     @Column(name = "title", unique = true, nullable = false)
     String title;
@@ -54,7 +55,7 @@ public class Movie extends AbstractEntity<Integer> {
     @OneToMany(mappedBy = "movie")
     List<ShowTime> showTimes = new ArrayList<>();
 
-    @OneToMany(mappedBy = "movie")
+    @OneToMany(mappedBy = "movie", fetch = FetchType.LAZY)
     @OnDelete(action = OnDeleteAction.CASCADE)
     List<MovieHasMovieType> movieHasMovieTypes = new ArrayList<>();
 

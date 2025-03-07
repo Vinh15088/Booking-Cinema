@@ -7,6 +7,8 @@ import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.io.Serializable;
+
 @Getter
 @Setter
 @Builder
@@ -15,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "movie_movie_type")
-public class MovieHasMovieType extends AbstractEntity<Integer> {
+public class MovieHasMovieType extends AbstractEntity<Integer> implements Serializable {
 
     @ManyToOne
     @JoinColumn(name = "movie_id")

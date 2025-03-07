@@ -7,6 +7,7 @@ import jakarta.persistence.Table;
 import lombok.*;
 import lombok.experimental.FieldDefaults;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -18,7 +19,7 @@ import java.util.List;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 @Entity
 @Table(name = "movie_type")
-public class MovieType extends AbstractEntity<Integer> {
+public class MovieType extends AbstractEntity<Integer> implements Serializable {
 
     @Column(name = "name", nullable = false)
     String name;
